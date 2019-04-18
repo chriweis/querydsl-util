@@ -1,4 +1,6 @@
 
+set schema PUBLIC;
+
 create table PERSON (
   ID bigint auto_increment primary key,
   NAME varchar2(255)

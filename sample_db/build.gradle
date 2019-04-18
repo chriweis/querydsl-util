@@ -3,21 +3,70 @@ plugins {
     id "org.flywaydb.flyway" version "5.2.4"
 }
 
+configurations {
+    querydslsql {
+        extendsFrom testRuntime
+    }
+}
+
 ext {
     h2DbFolder = "${projectDir}/db/sample_db"
+    jdbcUrl = "jdbc:h2:${h2DbFolder}"
+    jdbcUser = 'h2'
+    jdbcPassword = 'h2'
+    schema = 'PUBLIC'
+    queryDslPackageName = "${project.group.toString().replace('-', '_')}.${project.name.toString().replace('-', '_')}.generated.querydsl"
+    queryDslTargetFolder = "${sourceSets.main.java.srcDirs[0]}"
 }
 
 flyway {
-    url = "jdbc:h2:${h2DbFolder}"
-    user = 'h2'
-    password = 'h2'
+    url = jdbcUrl
+    user = jdbcUser
+    password = jdbcPassword
     locations = [ "filesystem:${projectDir}/src/main/resources/sample_db/db/migration/h2" ]
+    initSql = 'create schema if not exists FLYWAY'
+    schemas = [ 'FLYWAY', schema ]
 }
 
 dependencies {
     compile "com.querydsl:querydsl-sql:${queryDslVersion}"
 
     testCompile "junit:junit:${junitVersion}"
-    testCompile "org.flywaydb:flyway-core:${flywayVersion}"
     testCompile "com.h2database:h2:${h2Version}"
+    testCompile "org.flywaydb:flyway-core:${flywayVersion}"
+
+    querydslsql "com.querydsl:querydsl-sql-codegen:${queryDslVersion}"
 }
+
+tasks.flywayMigrate.doFirst {
+    println "delete ${h2DbFolder}"
+    println file(h2DbFolder).parentFile.deleteDir()
+}
+
+task generateQueryDsl(dependsOn: [ 'cleanGeneratedQueryDsl' ]) {
+    doLast {
+        def props = [
+                jdbcDriver     : 'org.h2.Driver'
+                , jdbcUrl      : jdbcUrl
+                , jdbcUser     : jdbcUser
+                , jdbcPassword : jdbcPassword
+                , packageName  : queryDslPackageName
+                , targetFolder : queryDslTargetFolder
+                , schemaPattern : schema
+        ]
+        ant.taskdef(
+                name: 'generateQueryDSL'
+                , classname: 'com.querydsl.sql.codegen.ant.AntMetaDataExporter'
+                , classpath: configurations.querydslsql.asPath
+        )
+        ant.generateQueryDSL(props)
+    }
+}
+
+task cleanGeneratedQueryDsl {
+    doLast {
+        file("${queryDslTargetFolder}/${queryDslPackageName.replace('.', '/')}").deleteDir()
+    }
+}
+
+tasks.clean.dependsOn cleanGeneratedQueryDsl
