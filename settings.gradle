@@ -1,1 +1,3 @@
 rootProject.name = 'querydsl-util'
+
+include 'sample_db'
