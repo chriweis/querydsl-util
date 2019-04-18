@@ -1,0 +1,23 @@
+
+plugins {
+    id "org.flywaydb.flyway" version "5.2.4"
+}
+
+ext {
+    h2DbFolder = "${projectDir}/db/sample_db"
+}
+
+flyway {
+    url = "jdbc:h2:${h2DbFolder}"
+    user = 'h2'
+    password = 'h2'
+    locations = [ "filesystem:${projectDir}/src/main/resources/sample_db/db/migration/h2" ]
+}
+
+dependencies {
+    compile "com.querydsl:querydsl-sql:${queryDslVersion}"
+
+    testCompile "junit:junit:${junitVersion}"
+    testCompile "org.flywaydb:flyway-core:${flywayVersion}"
+    testCompile "com.h2database:h2:${h2Version}"
+}
