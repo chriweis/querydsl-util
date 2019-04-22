@@ -7,7 +7,7 @@ create table PERSON (
 );
 
 create table ADDRESS (
-  ID bigint auto_increment,
+  ID bigint auto_increment primary key,
   PERSON_ID bigint
     references PERSON,
   VALUE varchar2(255)
