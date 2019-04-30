@@ -1,0 +1,9 @@
+
+dependencies {
+    compile "com.querydsl:querydsl-sql:${queryDslVersion}"
+    compile "org.reflections:reflections:0.9.11" // license: WTFPL
+    
+    testCompile project(':sample_db')
+    testCompile project(':sample_db').sourceSets.test.output
+    testCompile "org.flywaydb:flyway-core:${flywayVersion}"
+}
