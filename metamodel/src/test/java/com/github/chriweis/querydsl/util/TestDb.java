@@ -23,7 +23,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.function.Function;
 
-class TestDb {
+public class TestDb {
 
     private final TestDbConfiguration configuration;
 
@@ -120,7 +120,7 @@ class TestDb {
             }
             if (properties == null) {
                 properties = new Properties();
-                try (InputStream in = QUtilTablesTest.class.getResourceAsStream("/hibernate.default.properties")) {
+                try (InputStream in = this.getClass().getResourceAsStream("/hibernate.default.properties")) {
                     properties.load(in);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
