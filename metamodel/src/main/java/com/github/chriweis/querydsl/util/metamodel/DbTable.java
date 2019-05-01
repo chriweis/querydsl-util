@@ -8,8 +8,6 @@ import lombok.ToString;
 
 import java.util.Set;
 
-import static java.util.stream.Collectors.toSet;
-
 @Data
 @ToString(exclude = {"metamodel"})
 @EqualsAndHashCode(exclude = {"metamodel"})
@@ -26,34 +24,36 @@ public class DbTable {
         this.relationalPath = relationalPath;
     }
 
-    public void setMetamodel(DbMetamodel metamodel) {
+    public DbTable setMetamodel(DbMetamodel metamodel) {
         Assert.state(this.metamodel == null);
 
         this.metamodel = metamodel;
+
+        return this;
     }
 
-    public Set<DbTableLink> getRequired() {
-        return metamodel.getReferences().stream()
-                .filter(tableLink -> tableLink.getFrom() == relationalPath)
-                .collect(toSet());
+    public Set<DbTableRelationship> getRelationships() {
+        return metamodel.getRelationshipsOf(this);
     }
 
-    public Set<DbTableLink> getDependant() {
-        return metamodel.getReferences().stream()
-                .filter(tableLink -> tableLink.getTo() == relationalPath)
-                .collect(toSet());
+    public Set<DbTableRelationship> getForeignKeyRelationships() {
+        return metamodel.getForeignKeyRelationshipsIn(this);
+    }
+
+    public Set<DbTableRelationship> getInverseForeignKeyRelationships() {
+        return metamodel.getForeignKeyRelationshipsReferencing(this);
     }
 
     public void visit(DbMetamodelVisitor visitor) {
-        getRequired().stream()
-                .forEach(tableLink -> {
-                    DbTable requiredTable = metamodel.getTableFor(tableLink.getTo());
-                    visitor.visitRequired(this, requiredTable, tableLink);
+        getForeignKeyRelationships().stream()
+                .forEach(foreignKeyRelationship -> {
+                    DbTable keyTable = metamodel.getTableFor(foreignKeyRelationship.getKeyRelationalPath());
+                    visitor.visitForeignKey(foreignKeyRelationship, this, keyTable);
                 });
-        getDependant().stream()
-                .forEach(tableLink -> {
-                    DbTable dependantTable = metamodel.getTableFor(tableLink.getFrom());
-                    visitor.visitDependant(this, dependantTable, tableLink);
+        getInverseForeignKeyRelationships().stream()
+                .forEach(inverseForeignKeyRelationship -> {
+                    DbTable foreignKeyTable = metamodel.getTableFor(inverseForeignKeyRelationship.getForeignKeyRelationalPath());
+                    visitor.visitInverseForeignKey(inverseForeignKeyRelationship, this, foreignKeyTable);
                 });
     }
 }

@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toSet;
 public class DbMetamodel {
 
     private Set<DbTable> tables = new LinkedHashSet<>();
-    private Set<DbTableLink> references = new LinkedHashSet<>();
+    private Set<DbTableRelationship> foreignKeys = new LinkedHashSet<>();
 
     private boolean sealed = false;
 
@@ -51,10 +51,12 @@ public class DbMetamodel {
                 throw new RuntimeException(e);
             }
         };
-        references.addAll(new LinkedList<ForeignKey>(relationalPath.getForeignKeys()).stream()
+        foreignKeys.addAll(new LinkedList<ForeignKey>(relationalPath.getForeignKeys()).stream()
                 .map(mapper)
-                .map(field -> DbTableLink.fromForeignKeyField(field))
+                .map(field -> DbTableRelationship.fromForeignKeyField(field))
                 .collect(toSet()));
+        foreignKeys.stream()
+                .forEach(foreignKey -> foreignKey.setMetamodel(this));
     }
 
     public int getTableCount() {
@@ -70,5 +72,56 @@ public class DbMetamodel {
 
     public void seal() {
         sealed = true;
+    }
+
+    public Set<DbTableRelationship> getRelationshipsOf(RelationalPath<?> relationalPath) {
+        return getRelationshipsOf(getTableFor(relationalPath));
+    }
+
+    public Set<DbTableRelationship> getRelationshipsOf(DbTable table) {
+        return getForeignKeys().stream()
+                .filter(relationship -> relationship.hasTable(table))
+                .collect(toSet());
+    }
+
+    public Set<DbTableRelationship> getForeignKeyRelationshipsIn(DbTable table) {
+        return getForeignKeyRelationshipsIn(table.getRelationalPath());
+    }
+
+    public Set<DbTableRelationship> getForeignKeyRelationshipsIn(RelationalPath<?> relationalPath) {
+        return getForeignKeys().stream()
+                .filter(relationship -> relationship.getForeignKeyRelationalPath() == relationalPath)
+                .collect(toSet());
+    }
+
+    public Set<DbTable> getRequiredTablesFor(RelationalPath<?> relationalPath) {
+        return getForeignKeyRelationshipsIn(relationalPath).stream()
+                .map(DbTableRelationship::getKeyTable)
+                .collect(toSet());
+    }
+
+    public Set<DbTableRelationship> getInverseForeignKeyRelationshipsIn(DbTable table) {
+        return getForeignKeyRelationshipsReferencing(table);
+    }
+
+    public Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(DbTable table) {
+        return getForeignKeyRelationshipsReferencing(table.getRelationalPath());
+    }
+
+    public Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(RelationalPath<?> relationalPath) {
+        return getForeignKeys().stream()
+                .filter(relationship -> relationship.getKeyRelationalPath() == relationalPath)
+                .collect(toSet());
+    }
+
+    public void visit(DbMetamodelVisitor visitor) {
+        getTables().stream()
+                .forEach(visitor::visitTable);
+    }
+
+    public Set<DbTable> getDependentTablesOf(RelationalPath<?> relationalPath) {
+        return getForeignKeyRelationshipsReferencing(relationalPath).stream()
+                .map(DbTableRelationship::getForeignKeyTable)
+                .collect(toSet());
     }
 }

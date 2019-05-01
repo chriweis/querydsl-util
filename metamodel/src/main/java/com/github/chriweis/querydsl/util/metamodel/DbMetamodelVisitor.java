@@ -2,7 +2,9 @@ package com.github.chriweis.querydsl.util.metamodel;
 
 public interface DbMetamodelVisitor {
 
-    void visitRequired(DbTable table, DbTable requiredTable, DbTableLink tableLink);
+    void visitTable(DbTable table);
 
-    void visitDependant(DbTable table, DbTable dependantTable, DbTableLink tableLink);
+    void visitForeignKey(DbTableRelationship foreignKey, DbTable foreignKeyTable, DbTable keyTable);
+
+    void visitInverseForeignKey(DbTableRelationship foreignKey, DbTable keyTable, DbTable foreignKeyTable);
 }
