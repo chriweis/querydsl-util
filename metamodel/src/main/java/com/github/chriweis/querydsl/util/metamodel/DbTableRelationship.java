@@ -4,7 +4,7 @@ import com.github.chriweis.querydsl.util.QuerydslUtil;
 import com.github.chriweis.querydsl.util.util.Assert;
 import com.querydsl.core.types.Path;
 import com.querydsl.sql.ForeignKey;
-import com.querydsl.sql.RelationalPath;
+import com.querydsl.sql.RelationalPathBase;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,18 +22,18 @@ import static java.util.stream.Collectors.toList;
 @EqualsAndHashCode(exclude = {"metamodel"})
 public class DbTableRelationship {
 
-    private RelationalPath<?> foreignKeyRelationalPath;
+    private RelationalPathBase<?> foreignKeyRelationalPath;
     private List<? extends Path<?>> foreignKeyColumns;
-    private RelationalPath<?> keyRelationalPath;
+    private RelationalPathBase<?> keyRelationalPath;
     private List<? extends Path<?>> keyColumns;
     private DbMetamodel metamodel;
 
     public static DbTableRelationship fromForeignKeyField(Field field) {
         try {
-            RelationalPath foreignKeyPath = QuerydslUtil.relationalPath((Class<? extends RelationalPath<?>>) field.getDeclaringClass());
+            RelationalPathBase foreignKeyPath = QuerydslUtil.relationalPath((Class<? extends RelationalPathBase<?>>) field.getDeclaringClass());
 
-            Class<? extends RelationalPath<?>> keyPathType = (Class<? extends RelationalPath<?>>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-            RelationalPath keyPath = QuerydslUtil.relationalPath(keyPathType);
+            Class<? extends RelationalPathBase<?>> keyPathType = (Class<? extends RelationalPathBase<?>>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+            RelationalPathBase keyPath = QuerydslUtil.relationalPath(keyPathType);
 
             ForeignKey<?> foreignKey = (ForeignKey<?>) field.get(foreignKeyPath);
             List<? extends Path<?>> foreignKeyColumns = foreignKey.getLocalColumns();

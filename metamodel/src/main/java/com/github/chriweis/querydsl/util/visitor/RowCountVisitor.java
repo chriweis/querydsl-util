@@ -22,7 +22,7 @@ public class RowCountVisitor extends DbMetamodelVisitorAdapter {
 
     @Override
     public void visitTable(DbTable table) {
-        RelationalPathBase<?> relationalPath = (RelationalPathBase<?>) table.getRelationalPath();
+        RelationalPathBase<?> relationalPath = table.getRelationalPath();
         SQLQuery<Long> countQuery = queryFactory.select(relationalPath.count())
                 .from(relationalPath);
         rowCountQueries.put(table, countQuery);

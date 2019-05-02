@@ -1,7 +1,7 @@
 package com.github.chriweis.querydsl.util.metamodel;
 
 import com.github.chriweis.querydsl.util.util.Assert;
-import com.querydsl.sql.RelationalPath;
+import com.querydsl.sql.RelationalPathBase;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -13,14 +13,14 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {"metamodel"})
 public class DbTable {
 
-    private final RelationalPath<?> relationalPath;
+    private final RelationalPathBase<?> relationalPath;
     private DbMetamodel metamodel;
 
-    public static DbTable forRelationalPath(RelationalPath<?> relationalPath) {
+    public static DbTable forRelationalPath(RelationalPathBase<?> relationalPath) {
         return new DbTable(relationalPath);
     }
 
-    private DbTable(RelationalPath relationalPath) {
+    private DbTable(RelationalPathBase relationalPath) {
         this.relationalPath = relationalPath;
     }
 

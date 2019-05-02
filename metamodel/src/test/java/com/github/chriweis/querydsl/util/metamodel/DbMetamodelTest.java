@@ -1,7 +1,7 @@
 package com.github.chriweis.querydsl.util.metamodel;
 
 import com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson;
-import com.querydsl.sql.RelationalPath;
+import com.querydsl.sql.RelationalPathBase;
 import org.junit.Test;
 
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QAddress.address;
@@ -60,7 +60,7 @@ public class DbMetamodelTest {
         assertThat(metamodel.getRequiredTablesFor(address))
                 .hasSize(FOREIGN_KEYS_IN_ADDRESS)
                 .extracting(DbTable::getRelationalPath)
-                .contains((RelationalPath) person);
+                .contains((RelationalPathBase) person);
     }
 
     @Test
@@ -73,6 +73,6 @@ public class DbMetamodelTest {
         assertThat(metamodel.getDependentTablesOf(person))
                 .hasSize(FOREIGN_KEYS_REFERENCING_PERSON)
                 .extracting(DbTable::getRelationalPath)
-                .contains((RelationalPath) address);
+                .contains((RelationalPathBase) address);
     }
 }

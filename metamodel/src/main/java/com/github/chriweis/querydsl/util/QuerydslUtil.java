@@ -3,26 +3,28 @@ package com.github.chriweis.querydsl.util;
 import com.querydsl.core.types.Path;
 import com.querydsl.sql.ColumnMetadata;
 import com.querydsl.sql.ForeignKey;
-import com.querydsl.sql.RelationalPath;
 import com.querydsl.sql.RelationalPathBase;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 
 public class QuerydslUtil {
 
-    public static Set<RelationalPath> tablesIn(Package package$) {
+    public static Set<RelationalPathBase> tablesIn(Package package$) {
         Reflections reflections = new Reflections(package$.getName());
         return reflections.getSubTypesOf(RelationalPathBase.class).stream()
                 .map(QuerydslUtil::instanceOf)
                 .collect(toSet());
     }
 
-    private static <T extends RelationalPath> T instanceOf(Class<T> clazz) {
+    private static <T extends RelationalPathBase> T instanceOf(Class<T> clazz) {
         try {
             String instanceFieldName = clazz.getSimpleName().substring(1, 2).toLowerCase() + clazz.getSimpleName().substring(2);
             Field instanceField = clazz.getDeclaredField(instanceFieldName);
@@ -33,21 +35,22 @@ public class QuerydslUtil {
         }
     }
 
-    public static Set<? extends RelationalPath> requiredTablesFor(RelationalPath<?> relationalPath) {
+    public static Set<? extends RelationalPathBase> requiredTablesFor(RelationalPathBase<?> relationalPath) {
         return requiredTablesFor(relationalPath, new LinkedHashSet<>());
     }
 
-    public static Set<? extends RelationalPath> requiredTablesFor(RelationalPath<?> relationalPath, Set<RelationalPath> relationalPaths) {
+    public static Set<? extends RelationalPathBase> requiredTablesFor(RelationalPathBase<?> relationalPath, Set<RelationalPathBase> relationalPaths) {
         Set<ForeignKey<?>> foreignKeyFields = Arrays.stream(relationalPath.getClass().getDeclaredFields())
                 .filter(field -> field.getType().equals(ForeignKey.class))
                 .map(field -> getForeignKey(field, relationalPath))
                 .collect(toSet());
-        Set<? extends RelationalPath> requiredRelationalPaths = foreignKeyFields.stream()
+        Set<? extends RelationalPathBase> requiredRelationalPaths = foreignKeyFields.stream()
                 .map(ForeignKey::getEntity)
+                .map(RelationalPathBase.class::cast)
                 .map(QuerydslUtil::requiredTablesFor)
                 .flatMap(stream -> stream.stream())
                 .collect(toSet());
-        for (RelationalPath<?> relationalPath1 : requiredRelationalPaths) {
+        for (RelationalPathBase<?> relationalPath1 : requiredRelationalPaths) {
             if (relationalPaths.contains(relationalPath1)) {
                 continue;
             }
@@ -69,22 +72,22 @@ public class QuerydslUtil {
         }
     }
 
-    public static RelationalPath<?> relationalPath(Class<? extends RelationalPath<?>> clazz) {
+    public static RelationalPathBase<?> relationalPath(Class<? extends RelationalPathBase<?>> clazz) {
         try {
             Field field = clazz.getDeclaredField(clazz.getSimpleName().substring(1, 2).toLowerCase() + clazz.getSimpleName().substring(2));
             field.setAccessible(true);
-            return (RelationalPath<?>) field.get(null);
+            return (RelationalPathBase<?>) field.get(null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
     }
 
-    public static Path<?> column(RelationalPath<?> relationalPath, String columnName) {
+    public static Path<?> column(RelationalPathBase<?> relationalPath, String columnName) {
         try {
             for (Field field : relationalPath.getClass().getDeclaredFields()) {
                 if (!Path.class.isAssignableFrom(field.getType())
-                        || RelationalPath.class.isAssignableFrom(field.getType())) {
+                        || RelationalPathBase.class.isAssignableFrom(field.getType())) {
                     continue;
                 }
                 Path path = getValue(field, relationalPath, Path.class);

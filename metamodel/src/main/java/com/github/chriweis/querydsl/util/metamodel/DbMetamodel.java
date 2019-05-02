@@ -3,7 +3,7 @@ package com.github.chriweis.querydsl.util.metamodel;
 import com.github.chriweis.querydsl.util.QuerydslUtil;
 import com.github.chriweis.querydsl.util.util.Assert;
 import com.querydsl.sql.ForeignKey;
-import com.querydsl.sql.RelationalPath;
+import com.querydsl.sql.RelationalPathBase;
 import lombok.Data;
 
 import java.lang.reflect.Field;
@@ -37,7 +37,7 @@ public class DbMetamodel {
 
         table.setMetamodel(this);
         tables.add(table);
-        RelationalPath<?> relationalPath = table.getRelationalPath();
+        RelationalPathBase<?> relationalPath = table.getRelationalPath();
         Function<Object, Field> mapper = foreignKey -> {
             try {
                 for (Field field : relationalPath.getClass().getDeclaredFields()) {
@@ -63,7 +63,7 @@ public class DbMetamodel {
         return tables.size();
     }
 
-    public DbTable getTableFor(RelationalPath<?> relationalPath) {
+    public DbTable getTableFor(RelationalPathBase<?> relationalPath) {
         return tables.stream()
                 .filter(table -> table.getRelationalPath().equals(relationalPath))
                 .findFirst()
@@ -74,7 +74,7 @@ public class DbMetamodel {
         sealed = true;
     }
 
-    public Set<DbTableRelationship> getRelationshipsOf(RelationalPath<?> relationalPath) {
+    public Set<DbTableRelationship> getRelationshipsOf(RelationalPathBase<?> relationalPath) {
         return getRelationshipsOf(getTableFor(relationalPath));
     }
 
@@ -88,13 +88,13 @@ public class DbMetamodel {
         return getForeignKeyRelationshipsIn(table.getRelationalPath());
     }
 
-    public Set<DbTableRelationship> getForeignKeyRelationshipsIn(RelationalPath<?> relationalPath) {
+    public Set<DbTableRelationship> getForeignKeyRelationshipsIn(RelationalPathBase<?> relationalPath) {
         return getForeignKeys().stream()
                 .filter(relationship -> relationship.getForeignKeyRelationalPath() == relationalPath)
                 .collect(toSet());
     }
 
-    public Set<DbTable> getRequiredTablesFor(RelationalPath<?> relationalPath) {
+    public Set<DbTable> getRequiredTablesFor(RelationalPathBase<?> relationalPath) {
         return getForeignKeyRelationshipsIn(relationalPath).stream()
                 .map(DbTableRelationship::getKeyTable)
                 .collect(toSet());
@@ -108,7 +108,7 @@ public class DbMetamodel {
         return getForeignKeyRelationshipsReferencing(table.getRelationalPath());
     }
 
-    public Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(RelationalPath<?> relationalPath) {
+    public Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(RelationalPathBase<?> relationalPath) {
         return getForeignKeys().stream()
                 .filter(relationship -> relationship.getKeyRelationalPath() == relationalPath)
                 .collect(toSet());
@@ -119,7 +119,7 @@ public class DbMetamodel {
                 .forEach(visitor::visitTable);
     }
 
-    public Set<DbTable> getDependentTablesOf(RelationalPath<?> relationalPath) {
+    public Set<DbTable> getDependentTablesOf(RelationalPathBase<?> relationalPath) {
         return getForeignKeyRelationshipsReferencing(relationalPath).stream()
                 .map(DbTableRelationship::getForeignKeyTable)
                 .collect(toSet());

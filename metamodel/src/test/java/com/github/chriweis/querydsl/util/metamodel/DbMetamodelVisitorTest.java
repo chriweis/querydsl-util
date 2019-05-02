@@ -1,7 +1,7 @@
 package com.github.chriweis.querydsl.util.metamodel;
 
 import com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson;
-import com.querydsl.sql.RelationalPath;
+import com.querydsl.sql.RelationalPathBase;
 import lombok.Getter;
 import org.junit.Test;
 
@@ -42,19 +42,19 @@ public class DbMetamodelVisitorTest {
         assertThat(dependentTablesFor(address)).doesNotContain(table(person));
     }
 
-    private Set<DbTable> requiredTablesFor(RelationalPath<?> relationalPath) {
+    private Set<DbTable> requiredTablesFor(RelationalPathBase<?> relationalPath) {
         TestDbMetamodelVisitor visitor = new TestDbMetamodelVisitor();
         metamodel.getTableFor(relationalPath).visit(visitor);
         return visitor.getRequiredTables();
     }
 
-    private Set<DbTable> dependentTablesFor(RelationalPath<?> relationalPath) {
+    private Set<DbTable> dependentTablesFor(RelationalPathBase<?> relationalPath) {
         TestDbMetamodelVisitor visitor = new TestDbMetamodelVisitor();
         metamodel.getTableFor(relationalPath).visit(visitor);
         return visitor.getDependentTables();
     }
 
-    private DbTable table(RelationalPath<?> relationalPath) {
+    private DbTable table(RelationalPathBase<?> relationalPath) {
         return metamodel.getTableFor(relationalPath);
     }
 

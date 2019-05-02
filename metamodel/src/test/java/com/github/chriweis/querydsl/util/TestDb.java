@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class TestDb {
@@ -99,9 +101,12 @@ public class TestDb {
     @ToString
     public static class TestDbConfiguration {
 
-        public static final String DB_URL_PROPERTY = "hibernate.connection.url";
-        public static final String DB_USERNAME_PROPERTY = "hibernate.connection.username";
-        public static final String DB_PASSWORD_PROPERTY = "hibernate.connection.password";
+        private static final String DB_URL_PROPERTY = "hibernate.connection.url";
+        private static final String DB_USERNAME_PROPERTY = "hibernate.connection.username";
+        private static final String DB_PASSWORD_PROPERTY = "hibernate.connection.password";
+
+        private static final AtomicInteger COUNTER = new AtomicInteger(0);
+        private static final Random RANDOM = new Random();
 
         private String tempFolderPath;
         private String databaseName;
@@ -127,9 +132,13 @@ public class TestDb {
                 }
             }
             if (!initialized) {
-                String url = properties.getProperty(DB_URL_PROPERTY);
+                String originalUrl = properties.getProperty(DB_URL_PROPERTY);
                 File dbFolder = new File(new File(tempFolderPath), databaseName);
-                properties.setProperty(DB_URL_PROPERTY, url.replace("${dbFolder}", dbFolder.getAbsolutePath()));
+                String url = originalUrl
+                        .replace("${dbFolder}", dbFolder.getAbsolutePath())
+                        .replace("${dbNumber}", Integer.toString(COUNTER.incrementAndGet()))
+                        .replace("${random}", Integer.toString(RANDOM.nextInt(1_000_000)));
+                properties.setProperty(DB_URL_PROPERTY, url);
             }
             return properties;
         }
