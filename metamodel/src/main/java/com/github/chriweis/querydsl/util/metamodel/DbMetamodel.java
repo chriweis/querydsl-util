@@ -7,10 +7,7 @@ import com.querydsl.sql.RelationalPathBase;
 import lombok.Data;
 
 import java.lang.reflect.Field;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 import static com.github.chriweis.querydsl.util.util.BooleanUtil.not;
@@ -84,6 +81,14 @@ public class DbMetamodel {
                 .collect(toSet());
     }
 
+    public Optional<DbTableRelationship> getRelationshipBetween(DbTable table1, DbTable table2) {
+        return foreignKeys.stream()
+                .filter(rel -> rel.getKeyTable() == table1 || rel.getForeignKeyTable() == table1)
+                .filter(rel -> rel.getKeyTable() == table2 || rel.getForeignKeyTable() == table2)
+                .findAny();
+
+    }
+
     public Set<DbTableRelationship> getForeignKeyRelationshipsIn(DbTable table) {
         return getForeignKeyRelationshipsIn(table.getRelationalPath());
     }
@@ -116,7 +121,10 @@ public class DbMetamodel {
 
     public void visit(DbMetamodelVisitor visitor) {
         getTables().stream()
-                .forEach(visitor::visitTable);
+                .forEach(table -> {
+                    visitor.visitTable(table);
+                    table.visit(visitor);
+                });
     }
 
     public Set<DbTable> getDependentTablesOf(RelationalPathBase<?> relationalPath) {

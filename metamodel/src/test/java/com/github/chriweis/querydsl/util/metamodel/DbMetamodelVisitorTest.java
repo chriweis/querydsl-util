@@ -6,20 +6,30 @@ import lombok.Getter;
 import org.junit.Test;
 
 import java.util.LinkedHashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QAddress.address;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson.person;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 public class DbMetamodelVisitorTest {
 
     DbMetamodel metamodel = DbMetamodel.for$(QPerson.class.getPackage());
 
     @Test
-    public void shouldVisitTables() {
-        TestDbMetamodelVisitor visitor = new TestDbMetamodelVisitor();
-        metamodel.visit(visitor);
+    public void shouldVisitMetamodel() {
+        DbMetamodelVisitor visitorMock = mock(DbMetamodelVisitor.class);
+        DbTableRelationship personAddressRelationship = metamodel.getRelationshipBetween(tableFor(person), tableFor(address)).orElseThrow(NoSuchElementException::new);
+
+        metamodel.visit(visitorMock);
+
+        verify(visitorMock).visitTable(tableFor(person));
+        verify(visitorMock).visitTable(tableFor(address));
+        verify(visitorMock).visitForeignKey(personAddressRelationship, tableFor(address), tableFor(person));
+        verify(visitorMock).visitInverseForeignKey(personAddressRelationship, tableFor(person), tableFor(address));
+        verifyNoMoreInteractions(visitorMock);
     }
 
     @Test
@@ -58,8 +68,12 @@ public class DbMetamodelVisitorTest {
         return metamodel.getTableFor(relationalPath);
     }
 
+    private DbTable tableFor(RelationalPathBase<?> relationalPath) {
+        return metamodel.getTableFor(relationalPath);
+    }
+
     @Getter
-    private static class TestDbMetamodelVisitor implements DbMetamodelVisitor {
+    private static class TestDbMetamodelVisitor extends DbMetamodelVisitorAdapter {
 
         private Set<DbTable> tables = new LinkedHashSet<>();
         private Set<DbTable> requiredTables = new LinkedHashSet<>();
@@ -76,7 +90,6 @@ public class DbMetamodelVisitorTest {
                 return;
             }
             requiredTables.add(keyTable);
-            keyTable.visit(this);
         }
 
         @Override
@@ -85,7 +98,6 @@ public class DbMetamodelVisitorTest {
                 return;
             }
             dependentTables.add(foreignKeyTable);
-            foreignKeyTable.visit(this);
         }
     }
 }
