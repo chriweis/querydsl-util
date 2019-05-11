@@ -10,7 +10,9 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QAddress.address;
+import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCountry.country;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson.person;
+import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPersonType.personType;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -21,14 +23,26 @@ public class DbMetamodelVisitorTest {
     @Test
     public void shouldVisitMetamodel() {
         DbMetamodelVisitor visitorMock = mock(DbMetamodelVisitor.class);
-        DbTableRelationship personAddressRelationship = metamodel.getRelationshipBetween(tableFor(person), tableFor(address)).orElseThrow(NoSuchElementException::new);
+        DbTableRelationship personPersonTypeRelationship = metamodel.getRelationshipBetween(tableFor(personType), tableFor(person)).orElseThrow(NoSuchElementException::new);
+        DbTableRelationship addressPersonRelationship = metamodel.getRelationshipBetween(tableFor(person), tableFor(address)).orElseThrow(NoSuchElementException::new);
+        DbTableRelationship addressCountryRelationship = metamodel.getRelationshipBetween(tableFor(address), tableFor(country)).orElseThrow(NoSuchElementException::new);
 
         metamodel.visit(visitorMock);
 
+        verify(visitorMock).visitTable(tableFor(personType));
         verify(visitorMock).visitTable(tableFor(person));
         verify(visitorMock).visitTable(tableFor(address));
-        verify(visitorMock).visitForeignKey(personAddressRelationship, tableFor(address), tableFor(person));
-        verify(visitorMock).visitInverseForeignKey(personAddressRelationship, tableFor(person), tableFor(address));
+        verify(visitorMock).visitTable(tableFor(country));
+
+        verify(visitorMock).visitForeignKey(personPersonTypeRelationship, tableFor(person), tableFor(personType));
+        verify(visitorMock).visitInverseForeignKey(personPersonTypeRelationship, tableFor(personType), tableFor(person));
+
+        verify(visitorMock).visitForeignKey(addressPersonRelationship, tableFor(address), tableFor(person));
+        verify(visitorMock).visitInverseForeignKey(addressPersonRelationship, tableFor(person), tableFor(address));
+
+        verify(visitorMock).visitForeignKey(addressCountryRelationship, tableFor(address), tableFor(country));
+        verify(visitorMock).visitInverseForeignKey(addressCountryRelationship, tableFor(country), tableFor(address));
+
         verifyNoMoreInteractions(visitorMock);
     }
 

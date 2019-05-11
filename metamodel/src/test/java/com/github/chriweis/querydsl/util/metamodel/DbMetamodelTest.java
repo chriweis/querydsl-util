@@ -6,13 +6,16 @@ import org.junit.Test;
 
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QAddress.address;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson.person;
+import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPersonType.personType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DbMetamodelTest {
 
-    static int TABLE_COUNT = 2;
+    static int TABLE_COUNT = 4;
     static int FOREIGN_KEYS_REFERENCING_PERSON = 1;
-    static int FOREIGN_KEYS_IN_ADDRESS = 1;
+    static int RELATIONSHIPS_OF_PERSON = 2;
+    static int FOREIGN_KEYS_IN_ADDRESS = 2;
+    static int RELATIONSHIPS_OF_ADDRESS = 2;
 
     DbMetamodel metamodel = DbMetamodel.for$(QPerson.class.getPackage());
 
@@ -30,11 +33,11 @@ public class DbMetamodelTest {
     @Test
     public void shouldFindRelationships() {
         assertThat(metamodel.getRelationshipsOf(person))
-                .hasSize(FOREIGN_KEYS_REFERENCING_PERSON)
+                .hasSize(RELATIONSHIPS_OF_PERSON)
                 .extracting(TestUtil.foreignKeyPath)
                 .contains(address);
         assertThat(metamodel.getRelationshipsOf(address))
-                .hasSize(FOREIGN_KEYS_IN_ADDRESS)
+                .hasSize(RELATIONSHIPS_OF_ADDRESS)
                 .extracting(TestUtil.keyPath)
                 .contains(person);
     }
@@ -65,7 +68,7 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldNotFindInverseForeignKeysAsRequiredTables() {
-        assertThat(metamodel.getRequiredTablesFor(person)).isEmpty();
+        assertThat(metamodel.getRequiredTablesFor(personType)).isEmpty();
     }
 
     @Test

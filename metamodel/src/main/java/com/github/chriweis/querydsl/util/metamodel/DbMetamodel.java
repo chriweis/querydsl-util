@@ -48,12 +48,13 @@ public class DbMetamodel {
                 throw new RuntimeException(e);
             }
         };
-        foreignKeys.addAll(new LinkedList<ForeignKey>(relationalPath.getForeignKeys()).stream()
+        Set<DbTableRelationship> foreignKeysForTable = new LinkedList<ForeignKey>(relationalPath.getForeignKeys()).stream()
                 .map(mapper)
                 .map(field -> DbTableRelationship.fromForeignKeyField(field))
-                .collect(toSet()));
-        foreignKeys.stream()
+                .collect(toSet());
+        foreignKeysForTable.stream()
                 .forEach(foreignKey -> foreignKey.setMetamodel(this));
+        foreignKeys.addAll(foreignKeysForTable);
     }
 
     public int getTableCount() {

@@ -1,15 +1,15 @@
 package com.github.chriweis.querydsl.util.sampledb.generated.querydsl;
 
-import static com.querydsl.core.types.PathMetadataFactory.*;
-
-import com.querydsl.core.types.dsl.*;
-
-import com.querydsl.core.types.PathMetadata;
-import javax.annotation.Generated;
 import com.querydsl.core.types.Path;
-
+import com.querydsl.core.types.PathMetadata;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.ColumnMetadata;
+
+import javax.annotation.Generated;
 import java.sql.Types;
+
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 
 
 
@@ -24,6 +24,8 @@ public class QAddress extends com.querydsl.sql.RelationalPathBase<QAddress> {
 
     public static final QAddress address = new QAddress("ADDRESS");
 
+    public final NumberPath<Long> countryId = createNumber("countryId", Long.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final NumberPath<Long> personId = createNumber("personId", Long.class);
@@ -31,6 +33,8 @@ public class QAddress extends com.querydsl.sql.RelationalPathBase<QAddress> {
     public final StringPath value = createString("value");
 
     public final com.querydsl.sql.PrimaryKey<QAddress> constraintE = createPrimaryKey(id);
+
+    public final com.querydsl.sql.ForeignKey<QCountry> constraintE66 = createForeignKey(countryId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QPerson> constraintE6 = createForeignKey(personId, "ID");
 
@@ -60,9 +64,10 @@ public class QAddress extends com.querydsl.sql.RelationalPathBase<QAddress> {
     }
 
     public void addMetadata() {
+        addMetadata(countryId, ColumnMetadata.named("COUNTRY_ID").withIndex(3).ofType(Types.BIGINT).withSize(19).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.BIGINT).withSize(19).notNull());
-        addMetadata(personId, ColumnMetadata.named("PERSON_ID").withIndex(2).ofType(Types.BIGINT).withSize(19));
-        addMetadata(value, ColumnMetadata.named("VALUE").withIndex(3).ofType(Types.VARCHAR).withSize(255));
+        addMetadata(personId, ColumnMetadata.named("PERSON_ID").withIndex(2).ofType(Types.BIGINT).withSize(19).notNull());
+        addMetadata(value, ColumnMetadata.named("VALUE").withIndex(4).ofType(Types.VARCHAR).withSize(255));
     }
 
 }

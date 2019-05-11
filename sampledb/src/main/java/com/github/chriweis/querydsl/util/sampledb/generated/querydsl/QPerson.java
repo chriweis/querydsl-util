@@ -1,15 +1,16 @@
 package com.github.chriweis.querydsl.util.sampledb.generated.querydsl;
 
-import static com.querydsl.core.types.PathMetadataFactory.*;
-
-import com.querydsl.core.types.dsl.*;
-
-import com.querydsl.core.types.PathMetadata;
-import javax.annotation.Generated;
 import com.querydsl.core.types.Path;
-
+import com.querydsl.core.types.PathMetadata;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.ColumnMetadata;
+
+import javax.annotation.Generated;
 import java.sql.Types;
+import java.util.Arrays;
+
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 
 
 
@@ -28,7 +29,13 @@ public class QPerson extends com.querydsl.sql.RelationalPathBase<QPerson> {
 
     public final StringPath name = createString("name");
 
+    public final NumberPath<Long> personTypeFk1 = createNumber("personTypeFk1", Long.class);
+
+    public final NumberPath<Long> personTypeFk2 = createNumber("personTypeFk2", Long.class);
+
     public final com.querydsl.sql.PrimaryKey<QPerson> constraint8 = createPrimaryKey(id);
+
+    public final com.querydsl.sql.ForeignKey<QPersonType> personTypeFk = createForeignKey(Arrays.asList(personTypeFk1, personTypeFk2), Arrays.asList("ID_1", "ID_2"));
 
     public final com.querydsl.sql.ForeignKey<QAddress> _constraintE6 = createInvForeignKey(id, "PERSON_ID");
 
@@ -59,7 +66,9 @@ public class QPerson extends com.querydsl.sql.RelationalPathBase<QPerson> {
 
     public void addMetadata() {
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.BIGINT).withSize(19).notNull());
-        addMetadata(name, ColumnMetadata.named("NAME").withIndex(2).ofType(Types.VARCHAR).withSize(255));
+        addMetadata(name, ColumnMetadata.named("NAME").withIndex(4).ofType(Types.VARCHAR).withSize(255));
+        addMetadata(personTypeFk1, ColumnMetadata.named("PERSON_TYPE_FK_1").withIndex(2).ofType(Types.BIGINT).withSize(19).notNull());
+        addMetadata(personTypeFk2, ColumnMetadata.named("PERSON_TYPE_FK_2").withIndex(3).ofType(Types.BIGINT).withSize(19).notNull());
     }
 
 }
