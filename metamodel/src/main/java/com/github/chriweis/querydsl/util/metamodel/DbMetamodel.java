@@ -110,11 +110,17 @@ public class DbMetamodel {
         return getForeignKeyRelationshipsReferencing(table);
     }
 
-    public Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(DbTable table) {
+    public Set<DbTableRelationship> getInverseForeignKeyRelationshipsIn(RelationalPathBase<?> relationalPath) {
+        return getForeignKeys().stream()
+                .filter(relationship -> relationship.getKeyRelationalPath() == relationalPath)
+                .collect(toSet());
+    }
+
+    private Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(DbTable table) {
         return getForeignKeyRelationshipsReferencing(table.getRelationalPath());
     }
 
-    public Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(RelationalPathBase<?> relationalPath) {
+    private Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(RelationalPathBase<?> relationalPath) {
         return getForeignKeys().stream()
                 .filter(relationship -> relationship.getKeyRelationalPath() == relationalPath)
                 .collect(toSet());

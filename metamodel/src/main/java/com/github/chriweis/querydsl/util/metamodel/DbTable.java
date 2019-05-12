@@ -41,7 +41,7 @@ public class DbTable {
     }
 
     public Set<DbTableRelationship> getInverseForeignKeyRelationships() {
-        return metamodel.getForeignKeyRelationshipsReferencing(this);
+        return metamodel.getInverseForeignKeyRelationshipsIn(this);
     }
 
     public void visit(DbMetamodelVisitor visitor) {
