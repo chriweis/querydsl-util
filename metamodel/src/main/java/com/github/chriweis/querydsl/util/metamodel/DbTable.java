@@ -49,11 +49,13 @@ public class DbTable {
                 .forEach(foreignKeyRelationship -> {
                     DbTable keyTable = metamodel.getTableFor(foreignKeyRelationship.getKeyRelationalPath());
                     visitor.visitForeignKey(foreignKeyRelationship, this, keyTable);
+                    visitor.afterVisitForeignKey(foreignKeyRelationship, this, keyTable);
                 });
         getInverseForeignKeyRelationships().stream()
                 .forEach(inverseForeignKeyRelationship -> {
                     DbTable foreignKeyTable = metamodel.getTableFor(inverseForeignKeyRelationship.getForeignKeyRelationalPath());
                     visitor.visitInverseForeignKey(inverseForeignKeyRelationship, this, foreignKeyTable);
+                    visitor.afterVisitInverseForeignKey(inverseForeignKeyRelationship, this, foreignKeyTable);
                 });
     }
 }

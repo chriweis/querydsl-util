@@ -131,6 +131,7 @@ public class DbMetamodel {
                 .forEach(table -> {
                     visitor.visitTable(table);
                     table.visit(visitor);
+                    visitor.afterVisitTable(table);
                 });
     }
 

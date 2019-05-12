@@ -30,18 +30,28 @@ public class DbMetamodelVisitorTest {
         metamodel.visit(visitorMock);
 
         verify(visitorMock).visitTable(tableFor(personType));
+        verify(visitorMock).afterVisitTable(tableFor(personType));
         verify(visitorMock).visitTable(tableFor(person));
+        verify(visitorMock).afterVisitTable(tableFor(person));
         verify(visitorMock).visitTable(tableFor(address));
+        verify(visitorMock).afterVisitTable(tableFor(address));
         verify(visitorMock).visitTable(tableFor(country));
+        verify(visitorMock).afterVisitTable(tableFor(country));
 
         verify(visitorMock).visitForeignKey(personPersonTypeRelationship, tableFor(person), tableFor(personType));
+        verify(visitorMock).afterVisitForeignKey(personPersonTypeRelationship, tableFor(person), tableFor(personType));
         verify(visitorMock).visitInverseForeignKey(personPersonTypeRelationship, tableFor(personType), tableFor(person));
+        verify(visitorMock).afterVisitInverseForeignKey(personPersonTypeRelationship, tableFor(personType), tableFor(person));
 
         verify(visitorMock).visitForeignKey(addressPersonRelationship, tableFor(address), tableFor(person));
+        verify(visitorMock).afterVisitForeignKey(addressPersonRelationship, tableFor(address), tableFor(person));
         verify(visitorMock).visitInverseForeignKey(addressPersonRelationship, tableFor(person), tableFor(address));
+        verify(visitorMock).afterVisitInverseForeignKey(addressPersonRelationship, tableFor(person), tableFor(address));
 
         verify(visitorMock).visitForeignKey(addressCountryRelationship, tableFor(address), tableFor(country));
+        verify(visitorMock).afterVisitForeignKey(addressCountryRelationship, tableFor(address), tableFor(country));
         verify(visitorMock).visitInverseForeignKey(addressCountryRelationship, tableFor(country), tableFor(address));
+        verify(visitorMock).afterVisitInverseForeignKey(addressCountryRelationship, tableFor(country), tableFor(address));
 
         verifyNoMoreInteractions(visitorMock);
     }
