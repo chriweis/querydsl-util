@@ -1,6 +1,8 @@
 package com.github.chriweis.querydsl.util.metamodel;
 
-public interface DbMetamodelVisitor {
+public interface DbMetamodelVisitor<T extends DbMetamodelVisitor> {
+
+    T visit(DbMetamodel metamodel);
 
     void visitTable(DbTable table);
 

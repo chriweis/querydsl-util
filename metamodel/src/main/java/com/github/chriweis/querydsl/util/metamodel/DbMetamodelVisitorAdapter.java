@@ -1,6 +1,11 @@
 package com.github.chriweis.querydsl.util.metamodel;
 
-public class DbMetamodelVisitorAdapter implements DbMetamodelVisitor {
+public abstract class DbMetamodelVisitorAdapter<T extends DbMetamodelVisitor> implements DbMetamodelVisitor<T> {
+
+    @Override
+    public T visit(DbMetamodel metamodel) {
+        return (T) this;
+    }
 
     @Override
     public void visitTable(DbTable table) {
