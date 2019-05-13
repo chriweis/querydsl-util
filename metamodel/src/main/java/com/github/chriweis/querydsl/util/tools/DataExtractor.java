@@ -1,4 +1,4 @@
-package com.github.chriweis.querydsl.util.visitor;
+package com.github.chriweis.querydsl.util.tools;
 
 import com.github.chriweis.querydsl.util.metamodel.DbMetamodel;
 import com.github.chriweis.querydsl.util.metamodel.DbTable;
@@ -97,6 +97,7 @@ public class DataExtractor {
     @Data
     @AllArgsConstructor
     public static class ExtractionQuery {
+
         private DbTable table;
         private SQLQuery<Tuple> query;
         private BooleanExpression where;

@@ -1,9 +1,9 @@
-package com.github.chriweis.querydsl.util.visitor;
+package com.github.chriweis.querydsl.util.tools;
 
 import com.github.chriweis.querydsl.util.AbstractTestDbTest;
 import com.github.chriweis.querydsl.util.metamodel.DbMetamodel;
 import com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson;
-import com.github.chriweis.querydsl.util.visitor.DataExtractor.ExtractionQuery;
+import com.github.chriweis.querydsl.util.tools.DataExtractor.ExtractionQuery;
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.RelationalPathBase;
 import org.junit.Test;

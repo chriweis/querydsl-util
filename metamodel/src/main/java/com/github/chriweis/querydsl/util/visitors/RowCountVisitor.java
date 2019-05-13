@@ -1,4 +1,4 @@
-package com.github.chriweis.querydsl.util.visitor;
+package com.github.chriweis.querydsl.util.visitors;
 
 import com.github.chriweis.querydsl.util.metamodel.DbMetamodelVisitorAdapter;
 import com.github.chriweis.querydsl.util.metamodel.DbTable;
