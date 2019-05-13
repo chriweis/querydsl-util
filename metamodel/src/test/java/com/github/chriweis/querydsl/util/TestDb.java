@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationVersion;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -27,6 +28,17 @@ import java.util.function.Function;
 
 public class TestDb {
 
+    public enum InitializationMode {
+        WithoutData("1"), WithData("2");
+
+        @Getter
+        private String flywayTarget;
+
+        private InitializationMode(String flywayTarget) {
+            this.flywayTarget = flywayTarget;
+        }
+    }
+
     private final TestDbConfiguration configuration;
 
     private SessionFactory sessionFactory;
@@ -38,11 +50,12 @@ public class TestDb {
         this.configuration = configuration;
     }
 
-    public void initialize() {
+    public void initialize(InitializationMode initializationMode) {
         Flyway flyway = Flyway.configure()
                 .dataSource(configuration.dbUrl(), configuration.dbUsername(), configuration.dbPassword())
                 .locations(configuration.getMigrationsLocation())
                 .baselineOnMigrate(true)
+                .target(MigrationVersion.fromVersion(initializationMode.getFlywayTarget()))
                 .load();
         flyway.migrate();
 

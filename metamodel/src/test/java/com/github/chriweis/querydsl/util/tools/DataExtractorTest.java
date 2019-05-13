@@ -20,9 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DataExtractorTest extends AbstractTestDbTest {
 
+    DbMetamodel metamodel = DbMetamodel.for$(QPerson.class.getPackage());
+
     @Test
     public void shouldFetchTuples() {
-        DbMetamodel metamodel = DbMetamodel.for$(QPerson.class.getPackage());
         DataExtractor dataExtractor = new DataExtractor(testDb().sqlQueryFactory(), person, person.id.eq(1L));
 
         dataExtractor.extractFrom(metamodel);
