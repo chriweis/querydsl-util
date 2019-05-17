@@ -14,7 +14,7 @@ ext {
 project.group = 'com.github.chriweis.querydsl-util'
 project.version = '0.0.1-SNAPSHOT'
 
-subprojects { Project project ->
+subprojects { project ->
     project.group = project.parent.group
     project.version = project.parent.version
 
