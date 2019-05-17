@@ -1,11 +1,13 @@
 package com.github.chriweis.querydsl.util.metamodel;
 
 import com.github.chriweis.querydsl.util.util.Assert;
+import com.querydsl.core.types.Path;
 import com.querydsl.sql.RelationalPathBase;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -57,5 +59,9 @@ public class DbTable {
                     visitor.visitInverseForeignKey(inverseForeignKeyRelationship, this, foreignKeyTable);
                     visitor.afterVisitInverseForeignKey(inverseForeignKeyRelationship, this, foreignKeyTable);
                 });
+    }
+
+    public List<? extends Path<?>> getPrimaryKeyFields() {
+        return relationalPath.getPrimaryKey().getLocalColumns();
     }
 }
