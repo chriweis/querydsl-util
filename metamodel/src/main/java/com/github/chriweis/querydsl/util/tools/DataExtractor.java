@@ -14,14 +14,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.function.Function.identity;
 
 public class DataExtractor {
 
@@ -31,6 +29,7 @@ public class DataExtractor {
 
     @Getter
     private final Map<DbTable, ExtractionQuery> queries = new LinkedHashMap<>();
+    private List<DbTable> insertionOrder;
 
     public DataExtractor(SQLQueryFactory queryFactory, RelationalPathBase<?> relationalPath, BooleanExpression expression) {
         this.queryFactory = queryFactory;
@@ -53,9 +52,11 @@ public class DataExtractor {
         return selectQuery;
     }
 
-    public void extractFrom(DbMetamodel metamodel) {
+    public DataExtractor extractFrom(DbMetamodel metamodel) {
         DbTable table = metamodel.getTableFor(relationalPath);
         extractFrom(table, true, q -> q, emptyList());
+        insertionOrder = metamodel.orderTablesForInsertion(queries.keySet());
+        return this;
     }
 
     public void extractFrom(DbTable table, boolean follow, Function<SQLQuery<Tuple>, SQLQuery<Tuple>> joined, List<DbTableRelationship> noFollow) {
@@ -94,6 +95,21 @@ public class DataExtractor {
         return result;
     }
 
+    public Stream<Tuple> tuplesFor(RelationalPathBase<?> relationalPathBase) {
+        return queries.values()
+                .stream().filter(eq -> eq.getRelationalPath() == relationalPathBase)
+                .findFirst()
+                .orElseThrow(NoSuchElementException::new)
+                .tuples();
+    }
+
+    public Stream<ExtractedTuple> extractedTuples() {
+        return insertionOrder.stream()
+                .map(queries::get)
+                .map(ExtractionQuery::extractedTuples)
+                .flatMap(identity());
+    }
+
     @Data
     @AllArgsConstructor
     public static class ExtractionQuery {
@@ -109,5 +125,18 @@ public class DataExtractor {
         public Stream<Tuple> tuples() {
             return query.fetch().stream();
         }
+
+        public Stream<ExtractedTuple> extractedTuples() {
+            return tuples()
+                    .map(tuple -> new ExtractedTuple(table.getRelationalPath(), tuple));
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class ExtractedTuple {
+
+        private RelationalPathBase<?> relationalPath;
+        private Tuple tuple;
     }
 }

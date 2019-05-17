@@ -3,14 +3,7 @@ package com.github.chriweis.querydsl.util.tools;
 import com.github.chriweis.querydsl.util.AbstractTestDbTest;
 import com.github.chriweis.querydsl.util.metamodel.DbMetamodel;
 import com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson;
-import com.github.chriweis.querydsl.util.tools.DataExtractor.ExtractionQuery;
-import com.querydsl.core.Tuple;
-import com.querydsl.sql.RelationalPathBase;
 import org.junit.Test;
-
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QAddress.address;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCountry.country;
@@ -23,16 +16,23 @@ public class DataExtractorTest extends AbstractTestDbTest {
     DbMetamodel metamodel = DbMetamodel.for$(QPerson.class.getPackage());
 
     @Test
-    public void shouldFetchTuples() {
+    public void shouldFetchTuplesForEachTable() {
         DataExtractor dataExtractor = new DataExtractor(testDb().sqlQueryFactory(), person, person.id.eq(1L));
 
         dataExtractor.extractFrom(metamodel);
 
-        Map<RelationalPathBase, Stream<Tuple>> tuples = dataExtractor.getQueries().values().stream()
-                .collect(Collectors.toMap(ExtractionQuery::getRelationalPath, ExtractionQuery::tuples));
-        assertThat(tuples.get(personType)).hasSize(1);
-        assertThat(tuples.get(person)).hasSize(1);
-        assertThat(tuples.get(address)).hasSize(2);
-        assertThat(tuples.get(country)).hasSize(2);
+        assertThat(dataExtractor.tuplesFor(personType)).hasSize(1);
+        assertThat(dataExtractor.tuplesFor(person)).hasSize(1);
+        assertThat(dataExtractor.tuplesFor(address)).hasSize(2);
+        assertThat(dataExtractor.tuplesFor(country)).hasSize(2);
+    }
+
+    @Test
+    public void shouldFetchAllTuples() {
+        DataExtractor dataExtractor = new DataExtractor(testDb().sqlQueryFactory(), person, person.id.eq(1L));
+
+        dataExtractor.extractFrom(metamodel);
+
+        assertThat(dataExtractor.extractedTuples()).hasSize(6);
     }
 }

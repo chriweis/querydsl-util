@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.function.Function;
 
 import static com.github.chriweis.querydsl.util.util.BooleanUtil.not;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 @Data
@@ -106,6 +108,14 @@ public class DbMetamodel {
                 .collect(toSet());
     }
 
+    public Set<DbTable> getAllRequiredTablesFor(RelationalPathBase<?> relationalPath) {
+        Set<DbTable> requiredTables = getRequiredTablesFor(relationalPath);
+        for (DbTable requiredTable : new ArrayList<>(requiredTables)) {
+            requiredTables.addAll(getAllRequiredTablesFor(requiredTable.getRelationalPath()));
+        }
+        return requiredTables;
+    }
+
     public Set<DbTableRelationship> getInverseForeignKeyRelationshipsIn(DbTable table) {
         return getForeignKeyRelationshipsReferencing(table);
     }
@@ -139,5 +149,45 @@ public class DbMetamodel {
         return getForeignKeyRelationshipsReferencing(relationalPath).stream()
                 .map(DbTableRelationship::getForeignKeyTable)
                 .collect(toSet());
+    }
+
+    public List<DbTable> orderTablesForInsertion(Collection<DbTable> tables) {
+        List<RelationalPathBase<?>> relationalPaths = tables.stream().map(DbTable::getRelationalPath).collect(toList());
+        return orderPathsForInsertion(relationalPaths).stream()
+                .map(this::getTableFor)
+                .collect(toList());
+    }
+
+    public List<RelationalPathBase<?>> orderPathsForInsertion(Collection<RelationalPathBase<?>> relationalPathBases) {
+        ArrayList<RelationalPathBase<?>> result = new ArrayList<>(relationalPathBases);
+        result.sort(new InsertionOrderComparator(this));
+        return result;
+    }
+
+    public List<RelationalPathBase<?>> orderPathsForInsertion(RelationalPathBase<?>... relationalPathBases) {
+        return orderPathsForInsertion(asList(relationalPathBases));
+    }
+
+    private static class InsertionOrderComparator implements Comparator<RelationalPathBase<?>> {
+
+        private final DbMetamodel metamodel;
+
+        private InsertionOrderComparator(DbMetamodel metamodel) {
+            this.metamodel = metamodel;
+        }
+
+        @Override
+        public int compare(RelationalPathBase<?> p1, RelationalPathBase<?> p2) {
+            DbTable table1 = metamodel.getTableFor(p1);
+            DbTable table2 = metamodel.getTableFor(p2);
+            boolean p1RequiresP2 = metamodel.getAllRequiredTablesFor(p1).contains(table2);
+            boolean p2RequiresP1 = metamodel.getAllRequiredTablesFor(p2).contains(table1);
+            if (p1RequiresP2) {
+                return 1;
+            } else if (p2RequiresP1) {
+                return -1;
+            }
+            return 0;
+        }
     }
 }

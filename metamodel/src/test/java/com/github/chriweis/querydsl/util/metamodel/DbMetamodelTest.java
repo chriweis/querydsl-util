@@ -4,9 +4,12 @@ import com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson;
 import com.querydsl.sql.RelationalPathBase;
 import org.junit.Test;
 
+import java.util.List;
+
 import static com.github.chriweis.querydsl.util.metamodel.TestUtil.foreignKeyPath;
 import static com.github.chriweis.querydsl.util.metamodel.TestUtil.keyPath;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QAddress.address;
+import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCountry.country;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson.person;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPersonType.personType;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,5 +82,30 @@ public class DbMetamodelTest {
                 .hasSize(FOREIGN_KEYS_REFERENCING_PERSON)
                 .extracting(DbTable::getRelationalPath)
                 .contains((RelationalPathBase) address);
+    }
+
+    @Test
+    public void shouldFindAllRequiredTables() {
+        assertThat(metamodel.getAllRequiredTablesFor(address))
+                .extracting(DbTable::getRelationalPath)
+                .contains((RelationalPathBase) country)
+                .contains((RelationalPathBase) person)
+                .contains((RelationalPathBase) personType);
+    }
+
+    @Test
+    public void shouldOrderTablesByInsertionOrder1() {
+        List<RelationalPathBase<?>> insertionOrder = metamodel.orderPathsForInsertion(address, personType, person, country);
+        assertThat(insertionOrder.indexOf(personType)).isLessThan(insertionOrder.indexOf(person));
+        assertThat(insertionOrder.indexOf(person)).isLessThan(insertionOrder.indexOf(address));
+        assertThat(insertionOrder.indexOf(country)).isLessThan(insertionOrder.indexOf(address));
+    }
+
+    @Test
+    public void shouldOrderTablesByInsertionOrder2() {
+        List<RelationalPathBase<?>> insertionOrder = metamodel.orderPathsForInsertion(person, personType, address, country);
+        assertThat(insertionOrder.indexOf(personType)).isLessThan(insertionOrder.indexOf(person));
+        assertThat(insertionOrder.indexOf(person)).isLessThan(insertionOrder.indexOf(address));
+        assertThat(insertionOrder.indexOf(country)).isLessThan(insertionOrder.indexOf(address));
     }
 }
