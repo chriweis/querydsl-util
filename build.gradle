@@ -19,6 +19,8 @@ subprojects { project ->
     project.version = project.parent.version
 
     apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
 
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -29,9 +31,76 @@ subprojects { project ->
 
     dependencies {
         compile "org.projectlombok:lombok:${lombokVersion}"
-        
+
         testCompile "junit:junit:${junitVersion}"
         testCompile "org.assertj:assertj-core:${assertjVersion}"
         testCompile "org.mockito:mockito-core:${mockitoVersion}"
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from 'build/docs/javadoc'
+    }
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    signing {
+        useGpgCmd()
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        def repoUrl
+        if (project.version.endsWith('-SNAPSHOT')) {
+            repoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        } else {
+            repoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+        }
+        repositories {
+            mavenDeployer {
+                beforeDeployment { deployment -> signing.signPom(deployment) }
+
+                repository(url: repoUrl) {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+
+                pom.project {
+                    name 'QuerydslUtil'
+                    packaging 'jar'
+                    description 'Utilities to work with the querydsl metamodel'
+                    url 'https://github.com/chriweis/querydsl-util'
+
+                    scm {
+                        url 'scm:git@github.com:chriweis/querydsl-util.git'
+                        connection 'scm:git@github.com:chriweis/querydsl-util.git'
+                        developerConnection 'scm:git@github.com:chriweis/querydsl-util.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'chriweis'
+                            name 'Christian Weiss'
+                        }
+                    }
+                }
+            }
+        }
     }
 }

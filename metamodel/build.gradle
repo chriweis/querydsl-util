@@ -1,7 +1,8 @@
 
 dependencies {
-    compile "com.querydsl:querydsl-sql:${queryDslVersion}"
     compile "org.reflections:reflections:0.9.11" // license: WTFPL
+    
+    compileOnly "com.querydsl:querydsl-sql:${queryDslVersion}"
     
     testCompile project(':sampledb')
     testCompile project(':sampledb').sourceSets.test.output
