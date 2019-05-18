@@ -33,7 +33,7 @@ public class DataInserterTest extends AbstractTestDbTest {
 
         dataExtractor
                 .tuplesFor(country)
-                .forEach(tuple -> dataInserter.insert(country, tuple));
+                .forEach(extractedTuple -> dataInserter.insert(extractedTuple.getRelationalPath(), extractedTuple.getTuple()));
 
         Map<DbTable, Long> rowCounts = rowCounts(testDb2);
         assertThat(rowCounts.get(metamodel.getTableFor(country))).isEqualTo(1);

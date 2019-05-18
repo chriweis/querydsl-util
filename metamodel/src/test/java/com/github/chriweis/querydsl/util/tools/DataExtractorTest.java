@@ -3,6 +3,7 @@ package com.github.chriweis.querydsl.util.tools;
 import com.github.chriweis.querydsl.util.AbstractTestDbTest;
 import com.github.chriweis.querydsl.util.metamodel.DbMetamodel;
 import com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson;
+import com.github.chriweis.querydsl.util.tools.DataExtractor.ExtractionQuery;
 import org.junit.Test;
 
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QAddress.address;
@@ -34,5 +35,33 @@ public class DataExtractorTest extends AbstractTestDbTest {
         dataExtractor.extractFrom(metamodel);
 
         assertThat(dataExtractor.extractedTuples()).hasSize(6);
+    }
+
+    @Test
+    public void shouldIterateOverTuplesWithSimplePrimaryKey() {
+        DataExtractor dataExtractor = new DataExtractor(testDb().sqlQueryFactory(), person, person.id.eq(1L));
+
+        dataExtractor.extractFrom(metamodel);
+
+        assertThat(dataExtractor.tuplesFor(address, 1)).hasSize(2);
+    }
+
+    @Test
+    public void shouldIterateOverTuplesWithComplexPrimaryKey() {
+        DataExtractor dataExtractor = new DataExtractor(testDb().sqlQueryFactory(), person, person.id.eq(1L));
+
+        dataExtractor.extractFrom(metamodel);
+
+        assertThat(dataExtractor.tuplesFor(personType, 1)).hasSize(1);
+    }
+
+    @Test
+    public void shouldOrderTuplesWithComplexPrimaryKey() {
+        DataExtractor dataExtractor = new DataExtractor(testDb().sqlQueryFactory(), person, person.id.eq(1L));
+
+        ExtractionQuery extractionQuery = dataExtractor.extractFrom(metamodel).getQueries().get(metamodel.getTableFor(personType));
+
+        assertThat(extractionQuery.getPrimaryKeyOrder())
+                .contains(personType.id1.asc(), personType.id2.asc());
     }
 }
