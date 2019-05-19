@@ -9,14 +9,16 @@ import java.util.List;
 import static com.github.chriweis.querydsl.util.metamodel.TestUtil.foreignKeyPath;
 import static com.github.chriweis.querydsl.util.metamodel.TestUtil.keyPath;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QAddress.address;
+import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCommentOnPerson.commentOnPerson;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCountry.country;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson.person;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPersonType.personType;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DbMetamodelTest {
 
-    static int TABLE_COUNT = 4;
+    static int TABLE_COUNT = 5;
     static int FOREIGN_KEYS_REFERENCING_PERSON = 1;
     static int RELATIONSHIPS_OF_PERSON = 2;
     static int FOREIGN_KEYS_IN_ADDRESS = 2;
@@ -107,5 +109,20 @@ public class DbMetamodelTest {
         assertThat(insertionOrder.indexOf(personType)).isLessThan(insertionOrder.indexOf(person));
         assertThat(insertionOrder.indexOf(person)).isLessThan(insertionOrder.indexOf(address));
         assertThat(insertionOrder.indexOf(country)).isLessThan(insertionOrder.indexOf(address));
+    }
+
+    @Test
+    public void shouldSupportAdditionalForeignKeys() {
+        DbMetamodel metamodel = this.metamodel
+                .with(new DbTableRelationship(commentOnPerson, singletonList(commentOnPerson.personId), person, singletonList(person.id)));
+        assertThat(metamodel.getTableCount()).isEqualTo(this.metamodel.getTableCount());
+        assertThat(metamodel.getTables()).isEqualTo(this.metamodel.getTables());
+        assertThat(metamodel.getForeignKeys().size()).isEqualTo(this.metamodel.getForeignKeys().size() + 1);
+        assertThat(metamodel.getDependentTablesOf(person))
+                .extracting(DbTable::getRelationalPath)
+                .contains((RelationalPathBase) commentOnPerson);
+        assertThat(metamodel.getRelationshipsOf(commentOnPerson))
+                .extracting(keyPath)
+                .contains(person);
     }
 }

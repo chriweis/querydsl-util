@@ -5,27 +5,26 @@ import com.github.chriweis.querydsl.util.util.Assert;
 import com.querydsl.core.types.Path;
 import com.querydsl.sql.ForeignKey;
 import com.querydsl.sql.RelationalPathBase;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static lombok.AccessLevel.PACKAGE;
 
 @Data
-@AllArgsConstructor
+@AllArgsConstructor(access = PACKAGE)
+@RequiredArgsConstructor
 @ToString(exclude = "metamodel")
 @EqualsAndHashCode(exclude = {"metamodel"})
 public class DbTableRelationship {
 
-    private RelationalPathBase<?> foreignKeyRelationalPath;
-    private List<? extends Path<?>> foreignKeyColumns;
-    private RelationalPathBase<?> keyRelationalPath;
-    private List<? extends Path<?>> keyColumns;
+    private final RelationalPathBase<?> foreignKeyRelationalPath;
+    private final List<? extends Path<?>> foreignKeyColumns;
+    private final RelationalPathBase<?> keyRelationalPath;
+    private final List<? extends Path<?>> keyColumns;
     private DbMetamodel metamodel;
 
     public static DbTableRelationship fromForeignKeyField(Field field) {

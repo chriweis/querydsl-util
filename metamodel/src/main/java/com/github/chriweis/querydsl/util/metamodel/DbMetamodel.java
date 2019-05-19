@@ -4,18 +4,25 @@ import com.github.chriweis.querydsl.util.QuerydslUtil;
 import com.github.chriweis.querydsl.util.util.Assert;
 import com.querydsl.sql.ForeignKey;
 import com.querydsl.sql.RelationalPathBase;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.github.chriweis.querydsl.util.util.BooleanUtil.not;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static lombok.AccessLevel.PACKAGE;
+import static lombok.AccessLevel.PRIVATE;
 
 @Data
+@NoArgsConstructor(access = PACKAGE)
+@AllArgsConstructor(access = PRIVATE)
 public class DbMetamodel {
 
     private Set<DbTable> tables = new LinkedHashSet<>();
@@ -30,6 +37,18 @@ public class DbMetamodel {
                 .forEach(metamodel::addTable);
         metamodel.seal();
         return metamodel;
+    }
+
+    public DbMetamodel with(DbTableRelationship... tableRelationship) {
+        DbMetamodel result = new DbMetamodel();
+        this.tables.stream()
+                .map(DbTable::freshClone)
+                .forEach(result::addTable);
+        Stream.of(tableRelationship).forEach(r -> {
+            r.setMetamodel(result);
+            result.foreignKeys.add(r);
+        });
+        return result;
     }
 
     public void addTable(DbTable table) {

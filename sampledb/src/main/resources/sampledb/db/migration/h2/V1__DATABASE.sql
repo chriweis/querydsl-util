@@ -31,3 +31,9 @@ create table ADDRESS (
     references COUNTRY,
   VALUE varchar2(255)
 );
+
+create table COMMENT_ON_PERSON (
+  PERSON_ID bigint primary key,
+  COMMENT varchar2(255)
+  -- no foreign key on purpose
+)

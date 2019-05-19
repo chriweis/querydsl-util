@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QAddress.address;
+import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCommentOnPerson.commentOnPerson;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCountry.country;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson.person;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPersonType.personType;
@@ -37,6 +38,8 @@ public class DbMetamodelVisitorTest {
         verify(visitorMock).afterVisitTable(tableFor(address));
         verify(visitorMock).visitTable(tableFor(country));
         verify(visitorMock).afterVisitTable(tableFor(country));
+        verify(visitorMock).visitTable(tableFor(commentOnPerson));
+        verify(visitorMock).afterVisitTable(tableFor(commentOnPerson));
 
         verify(visitorMock).visitForeignKey(personPersonTypeRelationship, tableFor(person), tableFor(personType));
         verify(visitorMock).afterVisitForeignKey(personPersonTypeRelationship, tableFor(person), tableFor(personType));

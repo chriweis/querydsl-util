@@ -3,6 +3,7 @@ package com.github.chriweis.querydsl.util.metamodel;
 import com.github.chriweis.querydsl.util.util.Assert;
 import com.querydsl.core.types.Path;
 import com.querydsl.sql.RelationalPathBase;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -10,7 +11,10 @@ import lombok.ToString;
 import java.util.List;
 import java.util.Set;
 
+import static lombok.AccessLevel.PRIVATE;
+
 @Data
+@AllArgsConstructor(access = PRIVATE)
 @ToString(exclude = {"metamodel"})
 @EqualsAndHashCode(exclude = {"metamodel"})
 public class DbTable {
@@ -24,6 +28,10 @@ public class DbTable {
 
     private DbTable(RelationalPathBase relationalPath) {
         this.relationalPath = relationalPath;
+    }
+
+    DbTable freshClone() {
+        return new DbTable(relationalPath);
     }
 
     public DbTable setMetamodel(DbMetamodel metamodel) {
