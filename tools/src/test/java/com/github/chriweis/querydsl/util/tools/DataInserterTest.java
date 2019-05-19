@@ -5,7 +5,6 @@ import com.github.chriweis.querydsl.util.TestDb;
 import com.github.chriweis.querydsl.util.metamodel.DbMetamodel;
 import com.github.chriweis.querydsl.util.metamodel.DbTable;
 import com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson;
-import com.github.chriweis.querydsl.util.visitors.RowCountVisitor;
 import org.junit.Test;
 
 import java.util.Map;
@@ -55,8 +54,8 @@ public class DataInserterTest extends AbstractTestDbTest {
     }
 
     private Map<DbTable, Long> rowCounts(TestDb testDb2) {
-        RowCountVisitor rowCountVisitor = new RowCountVisitor(testDb2.sqlQueryFactory())
+        RowCounter rowCounter = new RowCounter(testDb2.sqlQueryFactory())
                 .visit(metamodel);
-        return rowCountVisitor.getRowCounts();
+        return rowCounter.getRowCounts();
     }
 }

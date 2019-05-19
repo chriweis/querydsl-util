@@ -1,4 +1,4 @@
-package com.github.chriweis.querydsl.util.visitors;
+package com.github.chriweis.querydsl.util.tools;
 
 import com.github.chriweis.querydsl.util.metamodel.DbMetamodel;
 import com.github.chriweis.querydsl.util.metamodel.DbMetamodelVisitorAdapter;
@@ -11,7 +11,7 @@ import com.querydsl.sql.SQLQueryFactory;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class RowCountVisitor extends DbMetamodelVisitorAdapter<RowCountVisitor> {
+public class RowCounter extends DbMetamodelVisitorAdapter<RowCounter> {
 
     private final SQLQueryFactory queryFactory;
     private final Map<DbTable, SQLQuery<Long>> rowCountQueries = new LinkedHashMap<>();
@@ -20,12 +20,12 @@ public class RowCountVisitor extends DbMetamodelVisitorAdapter<RowCountVisitor> 
 
     private boolean visited;
 
-    public RowCountVisitor(SQLQueryFactory queryFactory) {
+    public RowCounter(SQLQueryFactory queryFactory) {
         this.queryFactory = queryFactory;
     }
 
     @Override
-    public RowCountVisitor visit(DbMetamodel metamodel) {
+    public RowCounter visit(DbMetamodel metamodel) {
         metamodel.visit(this);
         return this;
     }

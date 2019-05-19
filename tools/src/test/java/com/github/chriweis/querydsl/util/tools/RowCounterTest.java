@@ -1,4 +1,4 @@
-package com.github.chriweis.querydsl.util.visitors;
+package com.github.chriweis.querydsl.util.tools;
 
 import com.github.chriweis.querydsl.util.AbstractTestDbTest;
 import com.github.chriweis.querydsl.util.metamodel.DbMetamodel;
@@ -15,9 +15,9 @@ import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPer
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class RowCountVisitorTest extends AbstractTestDbTest {
+public class RowCounterTest extends AbstractTestDbTest {
 
-    RowCountVisitor visitor = new RowCountVisitor(testDb().sqlQueryFactory());
+    RowCounter visitor = new RowCounter(testDb().sqlQueryFactory());
 
     @Test
     public void shouldReturnCountStatementsForAllTables() {
