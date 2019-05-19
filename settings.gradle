@@ -2,3 +2,4 @@ rootProject.name = 'querydsl-util'
 
 include 'sampledb'
 include 'metamodel'
+include 'tools'

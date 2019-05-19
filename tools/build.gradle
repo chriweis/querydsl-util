@@ -1,0 +1,10 @@
+
+dependencies {
+    compile project(':metamodel')
+
+    compileOnly "com.querydsl:querydsl-sql:${queryDslVersion}"
+
+    testCompile project(':sampledb')
+    testCompile project(':sampledb').sourceSets.test.output
+    testCompile "org.flywaydb:flyway-core:${flywayVersion}"
+}
