@@ -28,6 +28,7 @@ public class DbMetamodel {
         QuerydslUtil.tablesIn(package$).stream()
                 .map(path -> DbTable.forRelationalPath(path))
                 .forEach(metamodel::addTable);
+        metamodel.seal();
         return metamodel;
     }
 
@@ -71,6 +72,8 @@ public class DbMetamodel {
     }
 
     public void seal() {
+        this.tables = Collections.unmodifiableSet(this.tables);
+        this.foreignKeys = Collections.unmodifiableSet(this.foreignKeys);
         sealed = true;
     }
 
