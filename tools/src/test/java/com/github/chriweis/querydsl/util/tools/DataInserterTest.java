@@ -25,12 +25,12 @@ public class DataInserterTest extends AbstractTestDbTest {
 
     @Test
     public void shouldInsertData() {
-        DataExtractor dataExtractor = new DataExtractor(testDb1.sqlQueryFactory(), country, country.id.eq(1L))
+        DataSetExtractor dataSetExtractor = new DataSetExtractor(testDb1.sqlQueryFactory(), country, country.id.eq(1L))
                 .extractFrom(metamodel);
 
         DataInserter dataInserter = new DataInserter(testDb2.sqlQueryFactory());
 
-        dataExtractor
+        dataSetExtractor
                 .tuplesFor(country)
                 .forEach(extractedTuple -> dataInserter.insert(extractedTuple.getRelationalPath(), extractedTuple.getTuple()));
 
@@ -40,12 +40,12 @@ public class DataInserterTest extends AbstractTestDbTest {
 
     @Test
     public void shouldInsertDataWithouthViolatingForeignKeyRelationships() {
-        DataExtractor dataExtractor = new DataExtractor(testDb1.sqlQueryFactory(), person, person.id.eq(1L))
+        DataSetExtractor dataSetExtractor = new DataSetExtractor(testDb1.sqlQueryFactory(), person, person.id.eq(1L))
                 .extractFrom(metamodel);
 
         DataInserter dataInserter = new DataInserter(testDb2.sqlQueryFactory());
 
-        dataExtractor
+        dataSetExtractor
                 .extractedTuples()
                 .forEach(extractedTuple -> dataInserter.insert(extractedTuple.getRelationalPath(), extractedTuple.getTuple()));
 
