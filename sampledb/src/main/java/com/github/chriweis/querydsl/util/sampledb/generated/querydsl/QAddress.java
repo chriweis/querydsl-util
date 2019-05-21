@@ -1,15 +1,15 @@
 package com.github.chriweis.querydsl.util.sampledb.generated.querydsl;
 
-import com.querydsl.core.types.Path;
+import static com.querydsl.core.types.PathMetadataFactory.*;
+
+import com.querydsl.core.types.dsl.*;
+
 import com.querydsl.core.types.PathMetadata;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.StringPath;
-import com.querydsl.sql.ColumnMetadata;
-
 import javax.annotation.Generated;
-import java.sql.Types;
+import com.querydsl.core.types.Path;
 
-import static com.querydsl.core.types.PathMetadataFactory.forVariable;
+import com.querydsl.sql.ColumnMetadata;
+import java.sql.Types;
 
 
 
@@ -34,9 +34,9 @@ public class QAddress extends com.querydsl.sql.RelationalPathBase<QAddress> {
 
     public final com.querydsl.sql.PrimaryKey<QAddress> constraintE = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QCountry> constraintE66 = createForeignKey(countryId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QPerson> constraintE6 = createForeignKey(personId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QCountry> constraintE66 = createForeignKey(countryId, "ID");
 
     public QAddress(String variable) {
         super(QAddress.class, forVariable(variable), "PUBLIC", "ADDRESS");
