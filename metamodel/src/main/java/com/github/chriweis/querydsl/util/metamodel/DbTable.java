@@ -42,34 +42,34 @@ public class DbTable {
         return this;
     }
 
-    public Set<DbTableRelationship> getRelationships() {
-        return metamodel.getRelationshipsOf(this);
+    public Set<DbTableRelationship> relationships() {
+        return metamodel.relationshipsOf(this);
     }
 
-    public Set<DbTableRelationship> getForeignKeyRelationships() {
-        return metamodel.getForeignKeyRelationshipsIn(this);
+    public Set<DbTableRelationship> foreignKeyRelationships() {
+        return metamodel.foreignKeyRelationshipsIn(this);
     }
 
-    public Set<DbTableRelationship> getInverseForeignKeyRelationships() {
-        return metamodel.getInverseForeignKeyRelationshipsIn(this);
+    public Set<DbTableRelationship> inverseForeignKeyRelationships() {
+        return metamodel.inverseForeignKeyRelationshipsIn(this);
+    }
+
+    public List<? extends Path<?>> primaryKeyFields() {
+        return relationalPath.getPrimaryKey().getLocalColumns();
     }
 
     public void visit(DbMetamodelVisitor visitor) {
-        getForeignKeyRelationships().stream()
+        foreignKeyRelationships().stream()
                 .forEach(foreignKeyRelationship -> {
-                    DbTable keyTable = metamodel.getTableFor(foreignKeyRelationship.getKeyRelationalPath());
+                    DbTable keyTable = metamodel.tableFor(foreignKeyRelationship.getKeyRelationalPath());
                     visitor.visitForeignKey(foreignKeyRelationship, this, keyTable);
                     visitor.afterVisitForeignKey(foreignKeyRelationship, this, keyTable);
                 });
-        getInverseForeignKeyRelationships().stream()
+        inverseForeignKeyRelationships().stream()
                 .forEach(inverseForeignKeyRelationship -> {
-                    DbTable foreignKeyTable = metamodel.getTableFor(inverseForeignKeyRelationship.getForeignKeyRelationalPath());
+                    DbTable foreignKeyTable = metamodel.tableFor(inverseForeignKeyRelationship.getForeignKeyRelationalPath());
                     visitor.visitInverseForeignKey(inverseForeignKeyRelationship, this, foreignKeyTable);
                     visitor.afterVisitInverseForeignKey(inverseForeignKeyRelationship, this, foreignKeyTable);
                 });
-    }
-
-    public List<? extends Path<?>> getPrimaryKeyFields() {
-        return relationalPath.getPrimaryKey().getLocalColumns();
     }
 }

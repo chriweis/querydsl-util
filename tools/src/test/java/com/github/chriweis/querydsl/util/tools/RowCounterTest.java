@@ -26,10 +26,10 @@ public class RowCounterTest extends AbstractTestDbTest {
         visitor.visit(metamodel);
 
         Map<DbTable, Long> rowCounts = visitor.getRowCounts();
-        assertThat(rowCounts.get(metamodel.getTableFor(personType))).isEqualTo(2);
-        assertThat(rowCounts.get(metamodel.getTableFor(person))).isEqualTo(4);
-        assertThat(rowCounts.get(metamodel.getTableFor(country))).isEqualTo(4);
-        assertThat(rowCounts.get(metamodel.getTableFor(address))).isEqualTo(8);
+        assertThat(rowCounts.get(metamodel.tableFor(personType))).isEqualTo(2);
+        assertThat(rowCounts.get(metamodel.tableFor(person))).isEqualTo(4);
+        assertThat(rowCounts.get(metamodel.tableFor(country))).isEqualTo(4);
+        assertThat(rowCounts.get(metamodel.tableFor(address))).isEqualTo(8);
     }
 
     @Test

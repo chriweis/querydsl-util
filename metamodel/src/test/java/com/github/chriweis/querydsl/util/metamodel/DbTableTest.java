@@ -21,11 +21,11 @@ public class DbTableTest {
 
     @Test
     public void shouldFindRelationsships() {
-        assertThat(metamodel.getTableFor(person).getRelationships())
+        assertThat(metamodel.tableFor(person).relationships())
                 .hasSize(RELATIONSHIPS_OF_PERSON)
                 .extracting(foreignKeyPath)
                 .contains(address);
-        assertThat(metamodel.getTableFor(address).getRelationships())
+        assertThat(metamodel.tableFor(address).relationships())
                 .hasSize(RELATIONSHIPS_OF_ADDRESS)
                 .extracting(keyPath)
                 .contains(person);
@@ -33,14 +33,14 @@ public class DbTableTest {
 
     @Test
     public void shoudlFindSimplePrimaryKey() {
-        assertThat((List<Path<?>>) metamodel.getTableFor(person).getPrimaryKeyFields())
+        assertThat((List<Path<?>>) metamodel.tableFor(person).primaryKeyFields())
                 .hasSize(1)
                 .contains((Path<?>) person.id);
     }
 
     @Test
     public void shoudlFindCompositePrimaryKey() {
-        assertThat((List<Path<?>>) metamodel.getTableFor(personType).getPrimaryKeyFields())
+        assertThat((List<Path<?>>) metamodel.tableFor(personType).primaryKeyFields())
                 .hasSize(2)
                 .contains(personType.id1)
                 .contains(personType.id2);

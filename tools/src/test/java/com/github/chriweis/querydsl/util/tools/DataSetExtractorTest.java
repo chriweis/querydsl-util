@@ -71,7 +71,7 @@ public class DataSetExtractorTest extends AbstractTestDbTest {
     public void shouldOrderTuplesWithComplexPrimaryKey() {
         DataSetExtractor dataSetExtractor = new DataSetExtractor(testDb().sqlQueryFactory(), person, person.id.eq(1L));
 
-        DataExtractor dataExtractor = dataSetExtractor.extractFrom(metamodel).getDataExtractors().get(metamodel.getTableFor(personType));
+        DataExtractor dataExtractor = dataSetExtractor.extractFrom(metamodel).getDataExtractors().get(metamodel.tableFor(personType));
 
         assertThat(dataExtractor.getPrimaryKeyOrder())
                 .contains(personType.id1.asc(), personType.id2.asc());

@@ -24,9 +24,9 @@ public class DbMetamodelVisitorTest {
     @Test
     public void shouldVisitMetamodel() {
         DbMetamodelVisitor visitorMock = mock(DbMetamodelVisitor.class);
-        DbTableRelationship personPersonTypeRelationship = metamodel.getRelationshipBetween(tableFor(personType), tableFor(person)).orElseThrow(NoSuchElementException::new);
-        DbTableRelationship addressPersonRelationship = metamodel.getRelationshipBetween(tableFor(person), tableFor(address)).orElseThrow(NoSuchElementException::new);
-        DbTableRelationship addressCountryRelationship = metamodel.getRelationshipBetween(tableFor(address), tableFor(country)).orElseThrow(NoSuchElementException::new);
+        DbTableRelationship personPersonTypeRelationship = metamodel.relationshipBetween(personType, person).orElseThrow(NoSuchElementException::new);
+        DbTableRelationship addressPersonRelationship = metamodel.relationshipBetween(person, address).orElseThrow(NoSuchElementException::new);
+        DbTableRelationship addressCountryRelationship = metamodel.relationshipBetween(address, country).orElseThrow(NoSuchElementException::new);
 
         metamodel.visit(visitorMock);
 
@@ -81,22 +81,22 @@ public class DbMetamodelVisitorTest {
 
     private Set<DbTable> requiredTablesFor(RelationalPathBase<?> relationalPath) {
         TestDbMetamodelVisitor visitor = new TestDbMetamodelVisitor();
-        metamodel.getTableFor(relationalPath).visit(visitor);
+        metamodel.tableFor(relationalPath).visit(visitor);
         return visitor.getRequiredTables();
     }
 
     private Set<DbTable> dependentTablesFor(RelationalPathBase<?> relationalPath) {
         TestDbMetamodelVisitor visitor = new TestDbMetamodelVisitor();
-        metamodel.getTableFor(relationalPath).visit(visitor);
+        metamodel.tableFor(relationalPath).visit(visitor);
         return visitor.getDependentTables();
     }
 
     private DbTable table(RelationalPathBase<?> relationalPath) {
-        return metamodel.getTableFor(relationalPath);
+        return metamodel.tableFor(relationalPath);
     }
 
     private DbTable tableFor(RelationalPathBase<?> relationalPath) {
-        return metamodel.getTableFor(relationalPath);
+        return metamodel.tableFor(relationalPath);
     }
 
     @Getter

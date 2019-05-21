@@ -55,11 +55,11 @@ public class DbTableRelationship {
     }
 
     public DbTable getForeignKeyTable() {
-        return metamodel.getTableFor(foreignKeyRelationalPath);
+        return metamodel.tableFor(foreignKeyRelationalPath);
     }
 
     public DbTable getKeyTable() {
-        return metamodel.getTableFor(keyRelationalPath);
+        return metamodel.tableFor(keyRelationalPath);
     }
 
     public boolean hasTable(DbTable table) {

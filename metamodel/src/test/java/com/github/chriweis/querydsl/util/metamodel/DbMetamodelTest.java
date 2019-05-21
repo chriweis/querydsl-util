@@ -13,7 +13,6 @@ import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCom
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCountry.country;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson.person;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPersonType.personType;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,17 +33,17 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldFindTables() {
-        assertThat(metamodel.getTableFor(person)).isNotNull();
-        assertThat(metamodel.getTableFor(address)).isNotNull();
+        assertThat(metamodel.tableFor(person)).isNotNull();
+        assertThat(metamodel.tableFor(address)).isNotNull();
     }
 
     @Test
     public void shouldFindRelationships() {
-        assertThat(metamodel.getRelationshipsOf(person))
+        assertThat(metamodel.relationshipsOf(person))
                 .hasSize(RELATIONSHIPS_OF_PERSON)
                 .extracting(foreignKeyPath)
                 .contains(address);
-        assertThat(metamodel.getRelationshipsOf(address))
+        assertThat(metamodel.relationshipsOf(address))
                 .hasSize(RELATIONSHIPS_OF_ADDRESS)
                 .extracting(keyPath)
                 .contains(person);
@@ -52,7 +51,7 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldFindForeignKeys() {
-        assertThat(metamodel.getForeignKeyRelationshipsIn(address))
+        assertThat(metamodel.foreignKeyRelationshipsIn(address))
                 .hasSize(FOREIGN_KEYS_IN_ADDRESS)
                 .extracting(keyPath)
                 .contains(person);
@@ -60,21 +59,21 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldFindInverseForeignKeys() {
-        assertThat(metamodel.getInverseForeignKeyRelationshipsIn(person))
+        assertThat(metamodel.inverseForeignKeyRelationshipsIn(person))
                 .hasSize(FOREIGN_KEYS_REFERENCING_PERSON)
                 .extracting(foreignKeyPath)
                 .contains(address);
-        assertThat(metamodel.getInverseForeignKeyRelationshipsIn(person))
-                .isEqualTo(metamodel.getInverseForeignKeyRelationshipsIn(metamodel.getTableFor(person)));
-        assertThat(metamodel.getInverseForeignKeyRelationshipsIn(person))
-                .isEqualTo(metamodel.getForeignKeyRelationshipsReferencing(person));
-        assertThat(metamodel.getInverseForeignKeyRelationshipsIn(person))
-                .isEqualTo(metamodel.getForeignKeyRelationshipsReferencing(metamodel.getTableFor(person)));
+        assertThat(metamodel.inverseForeignKeyRelationshipsIn(person))
+                .isEqualTo(metamodel.inverseForeignKeyRelationshipsIn(metamodel.tableFor(person)));
+        assertThat(metamodel.inverseForeignKeyRelationshipsIn(person))
+                .isEqualTo(metamodel.foreignKeyRelationshipsReferencing(person));
+        assertThat(metamodel.inverseForeignKeyRelationshipsIn(person))
+                .isEqualTo(metamodel.foreignKeyRelationshipsReferencing(metamodel.tableFor(person)));
     }
 
     @Test
     public void shouldFindForeignKeysAsRequiredTables() {
-        assertThat(metamodel.getRequiredTablesFor(address))
+        assertThat(metamodel.requiredTablesFor(address))
                 .hasSize(FOREIGN_KEYS_IN_ADDRESS)
                 .extracting(DbTable::getRelationalPath)
                 .contains((RelationalPathBase) person);
@@ -82,12 +81,12 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldNotFindInverseForeignKeysAsRequiredTables() {
-        assertThat(metamodel.getRequiredTablesFor(personType)).isEmpty();
+        assertThat(metamodel.requiredTablesFor(personType)).isEmpty();
     }
 
     @Test
     public void shouldFindInverseForeignKeysAsDependentTables() {
-        assertThat(metamodel.getDependentTablesOf(person))
+        assertThat(metamodel.dependentTablesOf(person))
                 .hasSize(FOREIGN_KEYS_REFERENCING_PERSON)
                 .extracting(DbTable::getRelationalPath)
                 .contains((RelationalPathBase) address);
@@ -95,7 +94,7 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldFindAllRequiredTables() {
-        assertThat(metamodel.getAllRequiredTablesFor(address))
+        assertThat(metamodel.allRequiredTablesFor(address))
                 .extracting(DbTable::getRelationalPath)
                 .contains((RelationalPathBase) country)
                 .contains((RelationalPathBase) person)
@@ -104,7 +103,7 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldOrderTablesByInsertionOrder1() {
-        List<RelationalPathBase<?>> insertionOrder = metamodel.orderPathsForInsertion(asList((RelationalPathBase<?>[]) new RelationalPathBase[]{address, personType, person, country}));
+        List<RelationalPathBase<?>> insertionOrder = metamodel.pathsOrderedForInsertion(address, personType, person, country);
         assertThat(insertionOrder.indexOf(personType)).isLessThan(insertionOrder.indexOf(person));
         assertThat(insertionOrder.indexOf(person)).isLessThan(insertionOrder.indexOf(address));
         assertThat(insertionOrder.indexOf(country)).isLessThan(insertionOrder.indexOf(address));
@@ -112,7 +111,7 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldOrderTablesByInsertionOrder2() {
-        List<RelationalPathBase<?>> insertionOrder = metamodel.orderPathsForInsertion(asList((RelationalPathBase<?>[]) new RelationalPathBase[]{person, personType, address, country}));
+        List<RelationalPathBase<?>> insertionOrder = metamodel.pathsOrderedForInsertion(person, personType, address, country);
         assertThat(insertionOrder.indexOf(personType)).isLessThan(insertionOrder.indexOf(person));
         assertThat(insertionOrder.indexOf(person)).isLessThan(insertionOrder.indexOf(address));
         assertThat(insertionOrder.indexOf(country)).isLessThan(insertionOrder.indexOf(address));
@@ -125,10 +124,10 @@ public class DbMetamodelTest {
         assertThat(metamodel.getTableCount()).isEqualTo(this.metamodel.getTableCount());
         assertThat(metamodel.getTables()).isEqualTo(this.metamodel.getTables());
         assertThat(metamodel.getForeignKeys().size()).isEqualTo(this.metamodel.getForeignKeys().size() + 1);
-        assertThat(metamodel.getDependentTablesOf(person))
+        assertThat(metamodel.dependentTablesOf(person))
                 .extracting(DbTable::getRelationalPath)
                 .contains((RelationalPathBase) commentOnPerson);
-        assertThat(metamodel.getRelationshipsOf(commentOnPerson))
+        assertThat(metamodel.relationshipsOf(commentOnPerson))
                 .extracting(keyPath)
                 .contains(person);
     }

@@ -51,9 +51,9 @@ public class DataSetExtractor {
     }
 
     public DataSetExtractor extractFrom(DbMetamodel metamodel) {
-        DbTable table = metamodel.getTableFor(relationalPath);
+        DbTable table = metamodel.tableFor(relationalPath);
         extractFrom(table, true, q -> q, emptyList());
-        insertionOrder = metamodel.orderTablesForInsertion(dataExtractors.keySet());
+        insertionOrder = metamodel.tablesOrderedForInsertion(dataExtractors.keySet());
         return this;
     }
 
@@ -64,7 +64,7 @@ public class DataSetExtractor {
 
         dataExtractors.put(table, new DataExtractor(queryFactory, table.getRelationalPath(), query));
 
-        table.getForeignKeyRelationships().stream()
+        table.foreignKeyRelationships().stream()
                 .filter(rel -> !noFollow.contains(rel))
                 .forEach(rel -> {
                     extractFrom(rel.getKeyTable(), false, q -> {
@@ -75,7 +75,7 @@ public class DataSetExtractor {
                 });
 
         if (follow) {
-            table.getInverseForeignKeyRelationships().stream()
+            table.inverseForeignKeyRelationships().stream()
                     .filter(rel -> !noFollow.contains(rel))
                     .forEach(rel -> {
                         extractFrom(rel.getForeignKeyTable(), true, q -> {

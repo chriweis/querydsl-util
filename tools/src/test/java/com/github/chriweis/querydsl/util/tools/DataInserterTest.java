@@ -35,7 +35,7 @@ public class DataInserterTest extends AbstractTestDbTest {
                 .forEach(extractedTuple -> dataInserter.insert(extractedTuple.getRelationalPath(), extractedTuple.getTuple()));
 
         Map<DbTable, Long> rowCounts = rowCounts(testDb2);
-        assertThat(rowCounts.get(metamodel.getTableFor(country))).isEqualTo(1);
+        assertThat(rowCounts.get(metamodel.tableFor(country))).isEqualTo(1);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class DataInserterTest extends AbstractTestDbTest {
                 .forEach(extractedTuple -> dataInserter.insert(extractedTuple.getRelationalPath(), extractedTuple.getTuple()));
 
         Map<DbTable, Long> rowCounts = rowCounts(testDb2);
-        assertThat(rowCounts.get(metamodel.getTableFor(personType))).isEqualTo(1);
+        assertThat(rowCounts.get(metamodel.tableFor(personType))).isEqualTo(1);
     }
 
     private Map<DbTable, Long> rowCounts(TestDb testDb2) {
