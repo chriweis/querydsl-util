@@ -90,14 +90,10 @@ public class DbMetamodel {
                 .orElseThrow(NoSuchElementException::new);
     }
 
-    public void seal() {
+    protected void seal() {
         this.tables = Collections.unmodifiableSet(this.tables);
         this.foreignKeys = Collections.unmodifiableSet(this.foreignKeys);
         sealed = true;
-    }
-
-    public Set<DbTableRelationship> getRelationshipsOf(RelationalPathBase<?> relationalPath) {
-        return getRelationshipsOf(getTableFor(relationalPath));
     }
 
     public Set<DbTableRelationship> getRelationshipsOf(DbTable table) {
@@ -106,56 +102,65 @@ public class DbMetamodel {
                 .collect(toSet());
     }
 
+    public Set<DbTableRelationship> getRelationshipsOf(RelationalPathBase<?> relationalPath) {
+        return getRelationshipsOf(getTableFor(relationalPath));
+    }
+
     public Optional<DbTableRelationship> getRelationshipBetween(DbTable table1, DbTable table2) {
         return foreignKeys.stream()
                 .filter(rel -> rel.getKeyTable() == table1 || rel.getForeignKeyTable() == table1)
                 .filter(rel -> rel.getKeyTable() == table2 || rel.getForeignKeyTable() == table2)
                 .findAny();
-
     }
 
     public Set<DbTableRelationship> getForeignKeyRelationshipsIn(DbTable table) {
-        return getForeignKeyRelationshipsIn(table.getRelationalPath());
-    }
-
-    public Set<DbTableRelationship> getForeignKeyRelationshipsIn(RelationalPathBase<?> relationalPath) {
         return getForeignKeys().stream()
-                .filter(relationship -> relationship.getForeignKeyRelationalPath() == relationalPath)
+                .filter(relationship -> relationship.getForeignKeyRelationalPath() == table.getRelationalPath())
                 .collect(toSet());
     }
 
-    public Set<DbTable> getRequiredTablesFor(RelationalPathBase<?> relationalPath) {
-        return getForeignKeyRelationshipsIn(relationalPath).stream()
+    public Set<DbTableRelationship> getForeignKeyRelationshipsIn(RelationalPathBase<?> relationalPath) {
+        return getForeignKeyRelationshipsIn(getTableFor(relationalPath));
+    }
+
+    public Set<DbTable> getRequiredTablesFor(DbTable table) {
+        return getForeignKeyRelationshipsIn(table).stream()
                 .map(DbTableRelationship::getKeyTable)
                 .collect(toSet());
     }
 
-    public Set<DbTable> getAllRequiredTablesFor(RelationalPathBase<?> relationalPath) {
-        Set<DbTable> requiredTables = getRequiredTablesFor(relationalPath);
+    public Set<DbTable> getRequiredTablesFor(RelationalPathBase<?> relationalPath) {
+        return getRequiredTablesFor(getTableFor(relationalPath));
+    }
+
+    public Set<DbTable> getAllRequiredTablesFor(DbTable table) {
+        Set<DbTable> requiredTables = getRequiredTablesFor(table);
         for (DbTable requiredTable : new ArrayList<>(requiredTables)) {
-            requiredTables.addAll(getAllRequiredTablesFor(requiredTable.getRelationalPath()));
+            requiredTables.addAll(getAllRequiredTablesFor(requiredTable));
         }
         return requiredTables;
     }
 
+    public Set<DbTable> getAllRequiredTablesFor(RelationalPathBase<?> relationalPath) {
+        return getAllRequiredTablesFor(getTableFor(relationalPath));
+    }
+
     public Set<DbTableRelationship> getInverseForeignKeyRelationshipsIn(DbTable table) {
-        return getForeignKeyRelationshipsReferencing(table);
+        return getForeignKeys().stream()
+                .filter(relationship -> relationship.getKeyTable() == table)
+                .collect(toSet());
     }
 
     public Set<DbTableRelationship> getInverseForeignKeyRelationshipsIn(RelationalPathBase<?> relationalPath) {
-        return getForeignKeys().stream()
-                .filter(relationship -> relationship.getKeyRelationalPath() == relationalPath)
-                .collect(toSet());
+        return getForeignKeyRelationshipsReferencing(getTableFor(relationalPath));
     }
 
-    private Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(DbTable table) {
-        return getForeignKeyRelationshipsReferencing(table.getRelationalPath());
+    public Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(DbTable table) {
+        return getInverseForeignKeyRelationshipsIn(table);
     }
 
-    private Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(RelationalPathBase<?> relationalPath) {
-        return getForeignKeys().stream()
-                .filter(relationship -> relationship.getKeyRelationalPath() == relationalPath)
-                .collect(toSet());
+    public Set<DbTableRelationship> getForeignKeyRelationshipsReferencing(RelationalPathBase<?> relationalPath) {
+        return getForeignKeyRelationshipsReferencing(getTableFor(relationalPath));
     }
 
     public void visit(DbMetamodelVisitor visitor) {
@@ -174,15 +179,18 @@ public class DbMetamodel {
     }
 
     public List<DbTable> orderTablesForInsertion(Collection<DbTable> tables) {
-        List<RelationalPathBase<?>> relationalPaths = tables.stream().map(DbTable::getRelationalPath).collect(toList());
-        return orderPathsForInsertion(relationalPaths).stream()
-                .map(this::getTableFor)
-                .collect(toList());
+        List<DbTable> result = new ArrayList<>(tables);
+        result.sort(new InsertionOrderComparator(this));
+        return result;
     }
 
     public List<RelationalPathBase<?>> orderPathsForInsertion(Collection<RelationalPathBase<?>> relationalPathBases) {
-        ArrayList<RelationalPathBase<?>> result = new ArrayList<>(relationalPathBases);
-        result.sort(new InsertionOrderComparator(this));
+        List<DbTable> orderedTables = relationalPathBases.stream()
+                .map(this::getTableFor)
+                .collect(toList());
+        List<RelationalPathBase<?>> result = orderTablesForInsertion(orderedTables).stream()
+                .map(DbTable::getRelationalPath)
+                .collect(toList());
         return result;
     }
 
@@ -190,7 +198,7 @@ public class DbMetamodel {
         return orderPathsForInsertion(asList(relationalPathBases));
     }
 
-    private static class InsertionOrderComparator implements Comparator<RelationalPathBase<?>> {
+    private static class InsertionOrderComparator implements Comparator<DbTable> {
 
         private final DbMetamodel metamodel;
 
@@ -199,11 +207,9 @@ public class DbMetamodel {
         }
 
         @Override
-        public int compare(RelationalPathBase<?> p1, RelationalPathBase<?> p2) {
-            DbTable table1 = metamodel.getTableFor(p1);
-            DbTable table2 = metamodel.getTableFor(p2);
-            boolean p1RequiresP2 = metamodel.getAllRequiredTablesFor(p1).contains(table2);
-            boolean p2RequiresP1 = metamodel.getAllRequiredTablesFor(p2).contains(table1);
+        public int compare(DbTable table1, DbTable table2) {
+            boolean p1RequiresP2 = metamodel.getAllRequiredTablesFor(table1).contains(table2);
+            boolean p2RequiresP1 = metamodel.getAllRequiredTablesFor(table2).contains(table1);
             if (p1RequiresP2) {
                 return 1;
             } else if (p2RequiresP1) {

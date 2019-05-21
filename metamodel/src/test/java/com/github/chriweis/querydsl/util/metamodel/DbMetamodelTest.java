@@ -13,6 +13,7 @@ import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCom
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QCountry.country;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPerson.person;
 import static com.github.chriweis.querydsl.util.sampledb.generated.querydsl.QPersonType.personType;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,6 +64,12 @@ public class DbMetamodelTest {
                 .hasSize(FOREIGN_KEYS_REFERENCING_PERSON)
                 .extracting(foreignKeyPath)
                 .contains(address);
+        assertThat(metamodel.getInverseForeignKeyRelationshipsIn(person))
+                .isEqualTo(metamodel.getInverseForeignKeyRelationshipsIn(metamodel.getTableFor(person)));
+        assertThat(metamodel.getInverseForeignKeyRelationshipsIn(person))
+                .isEqualTo(metamodel.getForeignKeyRelationshipsReferencing(person));
+        assertThat(metamodel.getInverseForeignKeyRelationshipsIn(person))
+                .isEqualTo(metamodel.getForeignKeyRelationshipsReferencing(metamodel.getTableFor(person)));
     }
 
     @Test
@@ -97,7 +104,7 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldOrderTablesByInsertionOrder1() {
-        List<RelationalPathBase<?>> insertionOrder = metamodel.orderPathsForInsertion(address, personType, person, country);
+        List<RelationalPathBase<?>> insertionOrder = metamodel.orderPathsForInsertion(asList((RelationalPathBase<?>[]) new RelationalPathBase[]{address, personType, person, country}));
         assertThat(insertionOrder.indexOf(personType)).isLessThan(insertionOrder.indexOf(person));
         assertThat(insertionOrder.indexOf(person)).isLessThan(insertionOrder.indexOf(address));
         assertThat(insertionOrder.indexOf(country)).isLessThan(insertionOrder.indexOf(address));
@@ -105,7 +112,7 @@ public class DbMetamodelTest {
 
     @Test
     public void shouldOrderTablesByInsertionOrder2() {
-        List<RelationalPathBase<?>> insertionOrder = metamodel.orderPathsForInsertion(person, personType, address, country);
+        List<RelationalPathBase<?>> insertionOrder = metamodel.orderPathsForInsertion(asList((RelationalPathBase<?>[]) new RelationalPathBase[]{person, personType, address, country}));
         assertThat(insertionOrder.indexOf(personType)).isLessThan(insertionOrder.indexOf(person));
         assertThat(insertionOrder.indexOf(person)).isLessThan(insertionOrder.indexOf(address));
         assertThat(insertionOrder.indexOf(country)).isLessThan(insertionOrder.indexOf(address));
